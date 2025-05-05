@@ -5,6 +5,7 @@ import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge
 import { AnsiLogger } from 'matterbridge/logger';
 import { Platform } from './platform.js';
 import initializePlugin from './index';
+import { BTHome } from './BTHome';
 import { jest } from '@jest/globals';
 
 describe('initializePlugin', () => {
@@ -17,6 +18,15 @@ describe('initializePlugin', () => {
   let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
   let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
   const debug = false;
+
+  jest.spyOn(BTHome.prototype, 'start').mockImplementation(async () => {
+    // Mock implementation of BTHome.start
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+  });
 
   if (!debug) {
     // Spy on and mock AnsiLogger.log
@@ -90,7 +100,7 @@ describe('initializePlugin', () => {
     matterbridgeDirectory: './jest/matterbridge',
     matterbridgePluginDirectory: './jest/plugins',
     systemInformation: { ipv4Address: undefined, ipv6Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-    matterbridgeVersion: '2.2.9',
+    matterbridgeVersion: '3.0.0',
     edge: true,
     log: mockLog,
     getDevices: jest.fn(() => {
