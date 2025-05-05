@@ -8,7 +8,9 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "bin": { "bthome": "./bin/bthome.js" },  
+  "bin": {
+    "bthome": "./bin/bthome.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Luligu/matterbridge-bthome.git"

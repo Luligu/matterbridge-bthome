@@ -6,7 +6,7 @@ import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge
 import { wait } from 'matterbridge/utils';
 import { AnsiLogger } from 'matterbridge/logger';
 import { Platform } from './platform';
-
+import { BTHome } from './BTHome';
 import { jest } from '@jest/globals';
 
 describe('TestPlatform', () => {
@@ -19,6 +19,15 @@ describe('TestPlatform', () => {
   let consoleWarnSpy: jest.SpiedFunction<typeof console.log>;
   let consoleErrorSpy: jest.SpiedFunction<typeof console.log>;
   const debug = false;
+
+  jest.spyOn(BTHome.prototype, 'start').mockImplementation(async () => {
+    // Mock implementation of BTHome.start
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+  });
 
   if (!debug) {
     // Spy on and mock AnsiLogger.log
@@ -85,7 +94,7 @@ describe('TestPlatform', () => {
     matterbridgeDirectory: './jest/.matterbridge',
     matterbridgePluginDirectory: './jest/Matterbridge',
     systemInformation: { ipv4Address: undefined, ipv6Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-    matterbridgeVersion: '2.2.9',
+    matterbridgeVersion: '3.0.0',
     log: mockLog,
     getDevices: jest.fn(() => {
       // console.log('getDevices called');
@@ -137,9 +146,9 @@ describe('TestPlatform', () => {
   it('should throw error in load when version is not valid', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.0';
     expect(() => new Platform(mockMatterbridge, mockLog, mockConfig)).toThrow(
-      'This plugin requires Matterbridge version >= "2.2.9". Please update Matterbridge to the latest version in the frontend.',
+      'This plugin requires Matterbridge version >= "3.0.0". Please update Matterbridge to the latest version in the frontend.',
     );
-    mockMatterbridge.matterbridgeVersion = '2.2.9';
+    mockMatterbridge.matterbridgeVersion = '3.0.0';
   });
 
   it('should initialize platform with config name', () => {
