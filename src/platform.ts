@@ -38,7 +38,7 @@ import {
   pressureSensor,
   temperatureSensor,
 } from 'matterbridge';
-import { AnsiLogger, db, debugStringify, idn, rs, BLUE } from 'matterbridge/logger';
+import { AnsiLogger, db, debugStringify, idn, rs, BLUE, LogLevel } from 'matterbridge/logger';
 import { isValidArray } from 'matterbridge/utils';
 
 import { BTHome, BTHomeDevice } from './BTHome.js';
@@ -133,6 +133,11 @@ export class Platform extends MatterbridgeDynamicPlatform {
     }
   }
 
+  override async onChangeLoggerLevel(logLevel: LogLevel) {
+    this.log.info(`Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel}`);
+    this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
+  }
+
   override async onShutdown(reason?: string): Promise<void> {
     this.log.info('onShutdown called with reason:', reason ?? 'none');
 
@@ -223,7 +228,12 @@ export class Platform extends MatterbridgeDynamicPlatform {
     const matterbridgeDevice = this.bridgedDevices.get(device.mac);
     if (!matterbridgeDevice) return;
     for (const property in device.data) {
-      const converter = this.converter.find((converter) => converter.reading === property);
+      const [name, _index] = property.split(':');
+      const converter = this.converter.find((converter) => converter.reading === name);
+      if (!converter) {
+        this.log.debug(`***No converter found for property ${property} in device mac ${device.mac} model ${device.localName}`);
+        continue;
+      }
       if (converter && converter.deviceType && converter.cluster && converter.attribute) {
         const child = matterbridgeDevice.getChildEndpointByName(property);
         let value = device.data[property];

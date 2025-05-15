@@ -1,13 +1,15 @@
+// src/platform.test.ts
 /* eslint-disable no-unused-vars */
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
+
+import { jest } from '@jest/globals';
 import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import { wait } from 'matterbridge/utils';
-import { AnsiLogger } from 'matterbridge/logger';
+import { AnsiLogger, db, idn, LogLevel, rs } from 'matterbridge/logger';
 import { Platform } from './platform';
 import { BTHome } from './BTHome';
-import { jest } from '@jest/globals';
 
 describe('TestPlatform', () => {
   let platform: Platform;
@@ -165,6 +167,11 @@ describe('TestPlatform', () => {
   it('should call onConfigure', async () => {
     await platform.onConfigure();
     expect(mockLog.info).toHaveBeenCalledWith('onConfigure called');
+  });
+
+  it('should call onChangeLoggerLevel', async () => {
+    await platform.onChangeLoggerLevel(LogLevel.DEBUG);
+    expect(mockLog.info).toHaveBeenCalledWith(`Changing logger level for platform ${idn}${mockConfig.name}${rs}${db} to ${LogLevel.DEBUG}`);
   });
 
   // eslint-disable-next-line jest/no-commented-out-tests
