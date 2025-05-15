@@ -17,7 +17,7 @@ This plugin allows you to expose any BTHome device to Matter using the native bl
 
 Features:
 
-- The bluetooth works correctly on all platforms and is based the @stoprocent fork of noble.
+- The bluetooth works correctly on all platforms and is based on the @stoprocent fork of noble.
 - The discovered BTHome are stored with all attributes to easily restart the plugin.
 - The plugin has also a command line to test and verify the bluetooth adapter and the ble network.
 
