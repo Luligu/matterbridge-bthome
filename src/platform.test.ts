@@ -7,7 +7,7 @@
 import { jest } from '@jest/globals';
 import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import { wait } from 'matterbridge/utils';
-import { AnsiLogger, db, idn, LogLevel, rs } from 'matterbridge/logger';
+import { AnsiLogger, idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import { Platform } from './platform';
 import { BTHome } from './BTHome';
 
@@ -171,7 +171,7 @@ describe('TestPlatform', () => {
 
   it('should call onChangeLoggerLevel', async () => {
     await platform.onChangeLoggerLevel(LogLevel.DEBUG);
-    expect(mockLog.info).toHaveBeenCalledWith(`Changing logger level for platform ${idn}${mockConfig.name}${rs}${db} to ${LogLevel.DEBUG}`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Changing logger level for platform ${idn}${mockConfig.name}${rs}${nf} to ${LogLevel.DEBUG}`);
   });
 
   // eslint-disable-next-line jest/no-commented-out-tests

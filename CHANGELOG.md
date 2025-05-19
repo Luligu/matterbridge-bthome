@@ -8,6 +8,16 @@ If you like this project and find it useful, please consider giving it a star on
   <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
 </a>
 
+## [0.0.3] - 2025-05-19
+
+### Changed
+
+- [platform]: Updated deprecated import to run with matterbridge 3.0.3.
+
+<a href="https://www.buymeacoffee.com/luligugithub">
+  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
+</a>
+
 ## [0.0.2] - 2025-05-15
 
 ### Added
