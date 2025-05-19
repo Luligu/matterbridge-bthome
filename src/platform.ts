@@ -31,16 +31,15 @@ import {
   Matterbridge,
   MatterbridgeDynamicPlatform,
   MatterbridgeEndpoint,
-  NumberTag,
   occupancySensor,
   PlatformConfig,
   powerSource,
   pressureSensor,
   temperatureSensor,
 } from 'matterbridge';
-import { AnsiLogger, db, debugStringify, idn, rs, BLUE, LogLevel } from 'matterbridge/logger';
+import { AnsiLogger, db, debugStringify, idn, rs, BLUE, LogLevel, nf } from 'matterbridge/logger';
 import { isValidArray } from 'matterbridge/utils';
-
+import { NumberTag } from 'matterbridge/matter';
 import { BTHome, BTHomeDevice } from './BTHome.js';
 
 export class Platform extends MatterbridgeDynamicPlatform {
@@ -134,7 +133,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
   }
 
   override async onChangeLoggerLevel(logLevel: LogLevel) {
-    this.log.info(`Changing logger level for platform ${idn}${this.config.name}${rs}${db} to ${logLevel}`);
+    this.log.info(`Changing logger level for platform ${idn}${this.config.name}${rs}${nf} to ${logLevel}`);
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
   }
 
