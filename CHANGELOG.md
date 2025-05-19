@@ -13,6 +13,7 @@ If you like this project and find it useful, please consider giving it a star on
 ### Changed
 
 - [platform]: Updated deprecated import to run with matterbridge 3.0.3.
+- [package]: Updated package.
 
 <a href="https://www.buymeacoffee.com/luligugithub">
   <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
