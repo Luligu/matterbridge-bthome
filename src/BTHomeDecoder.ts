@@ -3,8 +3,9 @@
  *
  * @file src\BTHomeDecoder.ts
  * @author Luca Liguori
- * @date 2025-04-22
+ * @created 2025-04-22
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2025, 2026, 2027 Luca Liguori.
  *
@@ -25,6 +26,7 @@ import { BTHOME_SPEC } from './BTHomeSpec.js';
 
 /**
  * DecodedBTHome interface
+ *
  * @property {number} version - BTHome version. Currently only BTHome version 1 or 2 are allowed, where 2 is the latest version (bit 5-7 = 010).
  * @property {boolean} encrypted - The Encryption flag is telling the receiver whether the device is sending non-encrypted data (bit 0 = 0) or encrypted data (bit 0 = 1)
  * @property {boolean} trigger - The trigger based device flag is telling the receiver that it should expect that the device is sending BLE advertisements

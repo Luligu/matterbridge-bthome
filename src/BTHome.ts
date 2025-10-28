@@ -1,11 +1,11 @@
-#!/usr/bin/env node
 /**
  * This file contains the class BTHome.
  *
  * @file src\BTHome.ts
  * @author Luca Liguori
- * @date 2025-04-22
+ * @created 2025-04-22
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2025, 2026, 2027 Luca Liguori.
  *
@@ -22,15 +22,17 @@
  * limitations under the License. *
  */
 
-import { hasParameter, isValidNumber, isValidString } from 'matterbridge/utils';
-import { AnsiLogger, LogLevel, TimestampFormat, nf, BLUE, GREEN, MAGENTA, YELLOW } from 'matterbridge/logger';
+/* eslint-disable n/no-process-exit */
 
 import { EventEmitter } from 'node:events';
+
+import { hasParameter, isValidNumber, isValidString } from 'matterbridge/utils';
+import { AnsiLogger, LogLevel, TimestampFormat, nf, BLUE, GREEN, MAGENTA, YELLOW } from 'matterbridge/logger';
 import type { Noble, Peripheral, PeripheralAddressType, PeripheralAdvertisement, PeripheralState, Service } from '@stoprocent/noble';
+import { CYAN } from 'node-ansi-logger';
 
 import { decodeBTHome } from './BTHomeDecoder.js';
 import { decodeShellyManufacturerData } from './BTHomeShellyMdDecoder.js';
-import { CYAN } from 'node-ansi-logger';
 
 const _blushellies = [
   '38:39:8f:8b:d2:29', // Shelly BLU Button
@@ -61,6 +63,7 @@ const _shellies = [
 
 /**
  * Interface representing a Ble device.
+ *
  * @interface
  * @property {string} mac - The MAC address of the device.
  * @property {number} rssi - The Received Signal Strength Indicator (RSSI) of the device.
@@ -84,6 +87,7 @@ export interface BleDevice {
 
 /**
  * Interface representing a BTHome device.
+ *
  * @interface
  * @property {string} mac - The MAC address of the device.
  * @property {number} rssi - The Received Signal Strength Indicator (RSSI) of the device.
@@ -116,7 +120,8 @@ interface BTHomeEvents {
 
 /**
  * BTHome class for discovering and managing Bluetooth devices.
- * @extends EventEmitter
+ *
+ * @augments EventEmitter
  */
 export class BTHome extends EventEmitter<BTHomeEvents> {
   private noble: Noble | undefined;
@@ -129,23 +134,26 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Map to store discovered BTHome devices.
+   *
    * @type {Map<string, BTHomeDevice>}
    *
-   * @remark {string} - The key is the Bluetooth device's MAC address.
-   * @remark {BTHomeDevice} - The value is the BTHomeDevice object containing the device informations.
+   * @remarks {string} - The key is the Bluetooth device's MAC address.
+   * @remarks {BTHomeDevice} - The value is the BTHomeDevice object containing the device informations.
    */
   readonly bthomePeripherals: Map<string, BTHomeDevice> = new Map<string, BTHomeDevice>();
   /**
    * Map to store discovered Ble devices.
+   *
    * @type {Map<string, BTHomeDevice>}
    *
-   * @remark {string} - The key is the Bluetooth device's id.
-   * @remark {BTHomeDevice} - The value is the BleDevice object containing the device informations.
+   * @remarks {string} - The key is the Bluetooth device's id.
+   * @remarks {BTHomeDevice} - The value is the BleDevice object containing the device informations.
    */
   readonly blePeripherals: Map<string, BleDevice> = new Map<string, BleDevice>();
 
   /**
    * Creates an instance of the BTHome class.
+   *
    * @param {boolean} filterBle - Flag to filter BLE devices.
    * @param {boolean} filterBTHome - Flag to filter BTHome devices.
    * @param {boolean} filterShellyBle - Flag to filter Shelly BLE devices.
@@ -171,6 +179,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Checks if the given peripheral is a Shelly device with Ble component enabled.
+   *
    * @param {Peripheral} peripheral - The Bluetooth peripheral to check.
    * @returns {boolean} True if the peripheral is a Shelly device, false otherwise.
    */
@@ -182,6 +191,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Checks if the given peripheral is a BTHome device.
+   *
    * @param {Peripheral} peripheral - The Bluetooth peripheral to check.
    * @returns {boolean} True if the peripheral is a BTHome device, false otherwise.
    */
@@ -195,6 +205,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Handles the discovery of Bluetooth peripherals.
+   *
    * @param {Peripheral} peripheral - The discovered peripheral.
    */
   private async handleDiscovery(peripheral: Peripheral) {
@@ -344,6 +355,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Waits for the Bluetooth adapter to be powered on.
+   *
    * @returns {Promise<void>} A promise that resolves when the adapter is powered on.
    * @throws {Error} If the Bluetooth adapter is unsupported or unauthorized or timed out.
    */
@@ -379,6 +391,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Starts the Bluetooth scanning process.
+   *
    * @returns {Promise<void>} A promise that resolves when the scanning process starts.
    * @throws {Error} If an error occurs during the scanning process.
    */
@@ -417,6 +430,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Stops the Bluetooth scanning process.
+   *
    * @returns {Promise<void>} A promise that resolves when the scanning process stops.
    */
   async stop(): Promise<void> {
@@ -444,6 +458,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
   /**
    * Logs all discovered BTHome devices.
+   *
    * @returns {void}
    */
   logDevices(): void {
@@ -463,6 +478,12 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
   }
 }
 
+/**
+ * Check if a command line parameter is present.
+ *
+ * @param {string} name - The name of the parameter to check.
+ * @returns {string[]} An array of string values for the parameter.
+ */
 function getStringArrayParameter(name: string): string[] {
   const args = process.argv.slice(2);
   const idx = args.indexOf(`--${name}`) || args.indexOf(`-${name}`);

@@ -1,10 +1,11 @@
 /**
  * This file contains the Platform of the BTHome plugin.
  *
- * @file src\platform.ts
+ * @file src\module.ts
  * @author Luca Liguori
- * @date 2025-04-22
+ * @created 2025-04-22
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2025, 2026, 2027 Luca Liguori.
  *
@@ -28,37 +29,51 @@ import {
   genericSwitch,
   humiditySensor,
   lightSensor,
-  Matterbridge,
   MatterbridgeDynamicPlatform,
   MatterbridgeEndpoint,
   occupancySensor,
   PlatformConfig,
+  PlatformMatterbridge,
   powerSource,
   pressureSensor,
   temperatureSensor,
 } from 'matterbridge';
 import { AnsiLogger, db, debugStringify, idn, rs, BLUE, LogLevel, nf } from 'matterbridge/logger';
-import { isValidArray } from 'matterbridge/utils';
 import { NumberTag } from 'matterbridge/matter';
+
 import { BTHome, BTHomeDevice } from './BTHome.js';
+
+export type BTHomePlatformConfig = PlatformConfig & {
+  whiteList: string[];
+  blackList: string[];
+};
+
+/**
+ * This is the standard interface for Matterbridge plugins.
+ * Each plugin should export a default function that follows this signature.
+ *
+ * @param {Matterbridge} matterbridge - An instance of MatterBridge. This is the main interface for interacting with the MatterBridge system.
+ * @param {AnsiLogger} log - An instance of AnsiLogger. This is used for logging messages in a format that can be displayed with ANSI color codes.
+ * @param {PlatformConfig} config - The platform configuration.
+ * @returns {Platform} - An instance of the SomfyTahomaPlatform. This is the main interface for interacting with the Somfy Tahoma system.
+ */
+export default function initializePlugin(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: BTHomePlatformConfig): Platform {
+  return new Platform(matterbridge, log, config);
+}
 
 export class Platform extends MatterbridgeDynamicPlatform {
   readonly btHome = new BTHome();
   readonly bridgedDevices = new Map<string, MatterbridgeEndpoint>();
 
-  constructor(matterbridge: Matterbridge, log: AnsiLogger, config: PlatformConfig) {
+  constructor(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: BTHomePlatformConfig) {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.0.0')) {
-      throw new Error(`This plugin requires Matterbridge version >= "3.0.0". Please update Matterbridge to the latest version in the frontend.`);
+    if (this.verifyMatterbridgeVersion === undefined || typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.3.0')) {
+      throw new Error(`This plugin requires Matterbridge version >= "3.3.0". Please update Matterbridge to the latest version in the frontend.`);
     }
 
     this.log.info('Initializing platform:', this.config.name);
-
-    // Set the platform config defaults
-    if (!isValidArray(config.whiteList)) config.whiteList = [];
-    if (!isValidArray(config.blackList)) config.blackList = [];
 
     this.btHome.on('discovered', async (device: BTHomeDevice) => {
       this.log.notice(`Discovered new BTHome device: ${device.mac}`);
