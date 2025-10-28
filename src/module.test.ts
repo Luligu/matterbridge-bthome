@@ -118,13 +118,13 @@ describe('TestPlatform', () => {
   } as unknown as Matterbridge;
 
   const config: BTHomePlatformConfig = {
-    'name': 'matterbridge-bthome',
-    'type': 'DynamicPlatform',
-    'version': '0.0.1',
-    'whiteList': [],
-    'blackList': [],
-    'debug': true,
-    'unregisterOnShutdown': false,
+    name: 'matterbridge-bthome',
+    type: 'DynamicPlatform',
+    version: '0.0.1',
+    whiteList: [],
+    blackList: [],
+    debug: true,
+    unregisterOnShutdown: false,
   };
 
   beforeAll(() => {
