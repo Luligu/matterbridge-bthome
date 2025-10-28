@@ -3,8 +3,9 @@
  *
  * @file src\BTHomeSpec.ts
  * @author Luca Liguori
- * @date 2025-04-22
+ * @created 2025-04-22
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2025, 2026, 2027 Luca Liguori.
  *
@@ -49,6 +50,7 @@ export interface BTHomeSpecEntry {
   factor?: number;
   /**
    * Optional custom parser:
+   *
    * @param buf - full payload buffer
    * @param offset - start index of this field's data
    * @returns decoded value (string, number, object, etc.)

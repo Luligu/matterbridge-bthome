@@ -19,7 +19,7 @@ Features:
 
 - The bluetooth works correctly on all platforms and is based on the @stoprocent fork of noble.
 - The discovered BTHome are stored with all attributes to easily restart the plugin.
-- The plugin has also a command line to test and verify the bluetooth adapter and the ble network.
+- The plugin has also a command line **bthome** to test and verify the bluetooth adapter and the ble network.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-bthome and sponsoring it.
 

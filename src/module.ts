@@ -1,10 +1,11 @@
 /**
  * This file contains the Platform of the BTHome plugin.
  *
- * @file src\platform.ts
+ * @file src\module.ts
  * @author Luca Liguori
- * @date 2025-04-22
+ * @created 2025-04-22
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2025, 2026, 2027 Luca Liguori.
  *
@@ -39,6 +40,7 @@ import {
 } from 'matterbridge';
 import { AnsiLogger, db, debugStringify, idn, rs, BLUE, LogLevel, nf } from 'matterbridge/logger';
 import { NumberTag } from 'matterbridge/matter';
+
 import { BTHome, BTHomeDevice } from './BTHome.js';
 
 export type BTHomePlatformConfig = PlatformConfig & {
@@ -54,7 +56,6 @@ export type BTHomePlatformConfig = PlatformConfig & {
  * @param {AnsiLogger} log - An instance of AnsiLogger. This is used for logging messages in a format that can be displayed with ANSI color codes.
  * @param {PlatformConfig} config - The platform configuration.
  * @returns {Platform} - An instance of the SomfyTahomaPlatform. This is the main interface for interacting with the Somfy Tahoma system.
- *
  */
 export default function initializePlugin(matterbridge: PlatformMatterbridge, log: AnsiLogger, config: BTHomePlatformConfig): Platform {
   return new Platform(matterbridge, log, config);

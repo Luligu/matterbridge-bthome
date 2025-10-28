@@ -3,8 +3,9 @@
  *
  * @file src\BTHomeShellyMdDecoder.ts
  * @author Luca Liguori
- * @date 2025-04-22
+ * @created 2025-04-22
  * @version 1.0.0
+ * @license Apache-2.0
  *
  * Copyright 2025, 2026, 2027 Luca Liguori.
  *
@@ -46,8 +47,8 @@ const SHELLY_MODEL_SHORT_NAMES: Readonly<Record<number, string>> = {
 /**
  * Return the long name for a given Shelly BLU model ID.
  *
- * @param id – the numeric ID
- * @returns the long model name, or `undefined` if unknown
+ * @param {number} id – the numeric ID
+ * @returns {string | undefined} the long model name, or `undefined` if unknown
  */
 export function getShellyBluLongName(id: number): string | undefined {
   // return the mapping (record uses numeric keys)
@@ -57,8 +58,8 @@ export function getShellyBluLongName(id: number): string | undefined {
 /**
  * Return the long name for a given Shelly BLU model ID.
  *
- * @param idOrHex – the numeric ID
- * @returns the short model name, or `undefined` if unknown
+ * @param {number} id – the numeric ID
+ * @returns {string | undefined} the short model name, or `undefined` if unknown
  */
 export function getShellyBluShortName(id: number): string | undefined {
   // return the mapping (record uses numeric keys)
@@ -85,8 +86,8 @@ export interface ShellyManufacturerData {
 /**
  * Decode Shelly BLE Manufacturer Data (Allterco MFID 0x0BA9)
  *
- * @param input – raw manufacturerData as Buffer or hex string
- * @returns parsed fields
+ * @param {Buffer | string} input – raw manufacturerData as Buffer or hex string
+ * @returns {ShellyManufacturerData | null} parsed fields
  */
 export function decodeShellyManufacturerData(input: Buffer | string): ShellyManufacturerData | null {
   if (input.length < 10) return null;
