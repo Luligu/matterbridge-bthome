@@ -1,5 +1,5 @@
 // src/platform.test.ts
-/* eslint-disable no-unused-vars */
+
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
@@ -8,7 +8,7 @@ import { jest } from '@jest/globals';
 import { Matterbridge, MatterbridgeEndpoint, PlatformConfig } from 'matterbridge';
 import { wait } from 'matterbridge/utils';
 import { AnsiLogger, idn, LogLevel, nf, rs } from 'matterbridge/logger';
-import { Platform } from './platform';
+import initializePlugin, { BTHomePlatformConfig, Platform } from './module';
 import { BTHome } from './BTHome';
 
 describe('TestPlatform', () => {
@@ -96,7 +96,7 @@ describe('TestPlatform', () => {
     matterbridgeDirectory: './jest/.matterbridge',
     matterbridgePluginDirectory: './jest/Matterbridge',
     systemInformation: { ipv4Address: undefined, ipv6Address: undefined, osRelease: 'xx.xx.xx.xx.xx.xx', nodeVersion: '22.1.10' },
-    matterbridgeVersion: '3.0.0',
+    matterbridgeVersion: '3.3.0',
     log: mockLog,
     getDevices: jest.fn(() => {
       // console.log('getDevices called');
@@ -117,7 +117,7 @@ describe('TestPlatform', () => {
     }),
   } as unknown as Matterbridge;
 
-  const mockConfig = {
+  const config: BTHomePlatformConfig = {
     'name': 'matterbridge-bthome',
     'type': 'DynamicPlatform',
     'version': '0.0.1',
@@ -125,7 +125,7 @@ describe('TestPlatform', () => {
     'blackList': [],
     'debug': true,
     'unregisterOnShutdown': false,
-  } as PlatformConfig;
+  };
 
   beforeAll(() => {
     // Setup before all tests
@@ -145,18 +145,28 @@ describe('TestPlatform', () => {
     jest.restoreAllMocks();
   });
 
+  it('should return an instance of Platform', async () => {
+    platform = initializePlugin(mockMatterbridge, mockLog, config);
+    expect(platform).toBeInstanceOf(Platform);
+    expect(mockLog.info).toHaveBeenCalledWith('Initializing platform:', config.name);
+    expect(mockLog.info).toHaveBeenCalledWith('Finished initializing platform:', config.name);
+    await platform.ready;
+    await platform.onShutdown();
+    expect(mockLog.info).toHaveBeenCalledWith('onShutdown called with reason:', 'none');
+  });
+
   it('should throw error in load when version is not valid', () => {
     mockMatterbridge.matterbridgeVersion = '1.5.0';
-    expect(() => new Platform(mockMatterbridge, mockLog, mockConfig)).toThrow(
-      'This plugin requires Matterbridge version >= "3.0.0". Please update Matterbridge to the latest version in the frontend.',
+    expect(() => new Platform(mockMatterbridge, mockLog, config)).toThrow(
+      'This plugin requires Matterbridge version >= "3.3.0". Please update Matterbridge to the latest version in the frontend.',
     );
-    mockMatterbridge.matterbridgeVersion = '3.0.0';
+    mockMatterbridge.matterbridgeVersion = '3.3.0';
   });
 
   it('should initialize platform with config name', () => {
-    platform = new Platform(mockMatterbridge, mockLog, mockConfig);
-    expect(mockLog.info).toHaveBeenCalledWith('Initializing platform:', mockConfig.name);
-    expect(mockLog.info).toHaveBeenCalledWith('Finished initializing platform:', mockConfig.name);
+    platform = new Platform(mockMatterbridge, mockLog, config);
+    expect(mockLog.info).toHaveBeenCalledWith('Initializing platform:', config.name);
+    expect(mockLog.info).toHaveBeenCalledWith('Finished initializing platform:', config.name);
   });
 
   it('should call onStart with reason', async () => {
@@ -171,7 +181,7 @@ describe('TestPlatform', () => {
 
   it('should call onChangeLoggerLevel', async () => {
     await platform.onChangeLoggerLevel(LogLevel.DEBUG);
-    expect(mockLog.info).toHaveBeenCalledWith(`Changing logger level for platform ${idn}${mockConfig.name}${rs}${nf} to ${LogLevel.DEBUG}`);
+    expect(mockLog.info).toHaveBeenCalledWith(`Changing logger level for platform ${idn}${config.name}${rs}${nf} to ${LogLevel.DEBUG}`);
   });
 
   // eslint-disable-next-line jest/no-commented-out-tests

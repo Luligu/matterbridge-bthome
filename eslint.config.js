@@ -5,18 +5,18 @@ import tseslint from 'typescript-eslint';
 import eslintPluginJest from 'eslint-plugin-jest';
 import eslintPluginPrettier from 'eslint-plugin-prettier/recommended';
 import eslintPluginN from 'eslint-plugin-n';
-import eslintPluginPromise from 'eslint-plugin-promise';
 
 export default [
   {
     name: 'global ignores',
-    ignores: ['dist/', 'build/', 'node_modules/', 'coverage/', 'frontend/', 'rock-s0/', 'bin'],
+    ignores: ['dist/', 'build/', 'node_modules/', 'coverage/', 'frontend/', 'rock-s0/'],
   },
   eslint.configs.recommended,
   ...tseslint.configs.strict,
   ...tseslint.configs.stylistic,
+  // ...tseslint.configs.strictTypeChecked,
+  // ...tseslint.configs.stylisticTypeChecked,
   eslintPluginPrettier,
-  eslintPluginPromise.configs['flat/recommended'],
   {
     languageOptions: {
       ecmaVersion: 'latest',
@@ -29,21 +29,6 @@ export default [
       'no-console': 'warn',
       'no-undef': 'off',
       'spaced-comment': ['error', 'always'],
-      '@typescript-eslint/no-unused-vars': [
-        'warn',
-        {
-          varsIgnorePattern: '^_',
-          argsIgnorePattern: '^_',
-          caughtErrorsIgnorePattern: '^_',
-        },
-      ],
-      'no-unused-vars': [
-        'warn',
-        {
-          varsIgnorePattern: '^_',
-          argsIgnorePattern: '^_',
-        },
-      ],
     },
   },
   {
@@ -66,6 +51,19 @@ export default [
     },
     plugins: {
       '@typescript-eslint': tseslint.plugin,
+    },
+    rules: {
+      '@typescript-eslint/no-unused-vars': [
+        'error',
+        {
+          vars: 'all',
+          args: 'after-used',
+          ignoreRestSiblings: true,
+          varsIgnorePattern: '^_', // Ignore unused variables starting with _
+          argsIgnorePattern: '^_', // Ignore unused arguments starting with _
+          caughtErrorsIgnorePattern: '^_', // Ignore unused caught errors starting with _
+        },
+      ],
     },
   },
   {
