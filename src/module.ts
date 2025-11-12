@@ -196,7 +196,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
     if (!this.validateDevice(device.mac, true)) return;
     const matterbridgeDevice = new MatterbridgeEndpoint(
       [bridgedNode],
-      { uniqueStorageKey: 'BTHome ' + device.mac },
+      { id: 'BTHome ' + device.mac },
       this.config.debug as boolean,
     ).createDefaultBridgedDeviceBasicInformationClusterServer(
       'BTHome ' + device.mac,
@@ -216,11 +216,11 @@ export class Platform extends MatterbridgeDynamicPlatform {
           converter.deviceType,
           index
             ? {
-                uniqueStorageKey: property,
+                id: property,
                 tagList: [{ mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: parseInt(index), label: null }],
               }
             : {
-                uniqueStorageKey: property,
+                id: property,
               },
         );
         if (converter.cluster === 'PowerSource') child.createDefaultPowerSourceReplaceableBatteryClusterServer();
