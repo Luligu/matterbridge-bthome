@@ -10,6 +10,7 @@ import { idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import initializePlugin, { BTHomePlatformConfig, Platform } from './module.js';
 import { BTHome } from './BTHome.js';
 import {
+  addMatterbridgePlatform,
   createMatterbridgeEnvironment,
   destroyMatterbridgeEnvironment,
   log,
@@ -58,6 +59,7 @@ describe('TestPlatform', () => {
 
   afterEach(async () => {
     // Cleanup after each test
+    jest.clearAllMocks();
   });
 
   afterAll(async () => {
@@ -89,6 +91,7 @@ describe('TestPlatform', () => {
 
   it('should initialize platform with config name', () => {
     platform = new Platform(matterbridge, log, config);
+    addMatterbridgePlatform(platform);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Initializing platform:', config.name);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Finished initializing platform:', config.name);
   });

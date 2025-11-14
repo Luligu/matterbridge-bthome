@@ -32,7 +32,7 @@ jobs:
 
       - name: Install matterbridge dependencies
         working-directory: ../matterbridge
-        run: npm ci
+        run: npm ci --no-fund --no-audit
 
       - name: Build matterbridge
         working-directory: ../matterbridge
@@ -40,14 +40,14 @@ jobs:
 
       - name: Link matterbridge globally
         working-directory: ../matterbridge
-        run: npm link
+        run: npm link --no-fund --no-audit
 
       - name: Lint & test & build the plugin
         run: |
           npm ci
           npm link matterbridge
-          npm run lint
           npm run buildProduction
+          npm run lint
           npm install -g .
           npm run test -- --forceExit
           npm pkg delete devDependencies scripts types
