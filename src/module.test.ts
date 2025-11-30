@@ -6,9 +6,6 @@ import path from 'node:path';
 
 import { jest } from '@jest/globals';
 import { idn, LogLevel, nf, rs } from 'matterbridge/logger';
-
-import initializePlugin, { BTHomePlatformConfig, Platform } from './module.js';
-import { BTHome } from './BTHome.js';
 import {
   addMatterbridgePlatform,
   createMatterbridgeEnvironment,
@@ -19,10 +16,13 @@ import {
   setupTest,
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
-} from './utils/jestHelpers.js';
+} from 'matterbridge/jestutils';
+
+import initializePlugin, { BTHomePlatformConfig, Platform } from './module.js';
+import { BTHome } from './BTHome.js';
 
 // Setup the test environment
-setupTest(NAME, false);
+await setupTest(NAME, false);
 
 describe('TestPlatform', () => {
   let platform: Platform;
@@ -84,9 +84,9 @@ describe('TestPlatform', () => {
   it('should throw error in load when version is not valid', () => {
     matterbridge.matterbridgeVersion = '1.5.0';
     expect(() => new Platform(matterbridge, log, config)).toThrow(
-      'This plugin requires Matterbridge version >= "3.3.0". Please update Matterbridge to the latest version in the frontend.',
+      'This plugin requires Matterbridge version >= "3.4.0". Please update Matterbridge to the latest version in the frontend.',
     );
-    matterbridge.matterbridgeVersion = '3.3.0';
+    matterbridge.matterbridgeVersion = '3.4.0';
   });
 
   it('should initialize platform with config name', () => {
