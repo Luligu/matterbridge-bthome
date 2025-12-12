@@ -14,6 +14,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated to the current Matterbridge signatures.
 - [package]: Required matterbridge v.3.4.0.
 - [package]: Updated to the Matterbridge Jest module.
+- [package]: Bumped package to automator v.2.1.0.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
