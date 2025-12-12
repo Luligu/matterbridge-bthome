@@ -4,9 +4,19 @@ All notable changes to this project will be documented in this file.
 
 If you like this project and find it useful, please consider giving it a star on GitHub at https://github.com/Luligu/matterbridge-webhooks and sponsoring it.
 
-<a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="120">
-</a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
+
+## [1.0.2] - 2025-12-12
+
+### Changed
+
+- [package]: Updated dependencies.
+- [package]: Updated to the current Matterbridge signatures.
+- [package]: Required matterbridge v.3.4.0.
+- [package]: Updated to the Matterbridge Jest module.
+- [package]: Bumped package to automator v.2.1.0.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.1] - 2025-11-14
 
@@ -17,9 +27,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Updated to the current Matterbridge signatures.
 - [jest]: Updated jestHelpers to v.1.0.12.
 
-<a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
-</a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.0] - 2025-10-28
 
@@ -39,9 +47,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [devcontainer]: Added the plugin name to the container.
 - [devcontainer]: Improved performance of first build with shallow clone.
 
-<a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
-</a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.0.3] - 2025-05-19
 
@@ -50,9 +56,7 @@ If you like this project and find it useful, please consider giving it a star on
 - [platform]: Updated deprecated import to run with matterbridge 3.0.3.
 - [package]: Updated package.
 
-<a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
-</a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.0.2] - 2025-05-15
 
@@ -68,17 +72,13 @@ If you like this project and find it useful, please consider giving it a star on
 
 - [update]: Fixed bug on update with multiple properties.
 
-<a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
-</a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [0.0.1] - 2025-05-05
 
 First published release.
 
-<a href="https://www.buymeacoffee.com/luligugithub">
-  <img src="bmc-button.svg" alt="Buy me a coffee" width="80">
-</a>
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 <!-- Commented out section
 ## [1.1.2] - 2024-03-08
