@@ -6,7 +6,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
-## [1.0.2] - 2025-11-30
+## [1.0.2] - 2025-12-12
 
 ### Changed
 
