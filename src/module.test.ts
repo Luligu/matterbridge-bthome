@@ -72,6 +72,7 @@ describe('TestPlatform', () => {
   });
 
   it('should return an instance of Platform', async () => {
+    matterbridge.matterbridgeVersion = '3.5.0';
     platform = initializePlugin(matterbridge, log, config);
     expect(platform).toBeInstanceOf(Platform);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Initializing platform:', config.name);
@@ -84,9 +85,9 @@ describe('TestPlatform', () => {
   it('should throw error in load when version is not valid', () => {
     matterbridge.matterbridgeVersion = '1.5.0';
     expect(() => new Platform(matterbridge, log, config)).toThrow(
-      'This plugin requires Matterbridge version >= "3.4.0". Please update Matterbridge to the latest version in the frontend.',
+      'This plugin requires Matterbridge version >= "3.5.0". Please update Matterbridge to the latest version in the frontend.',
     );
-    matterbridge.matterbridgeVersion = '3.4.0';
+    matterbridge.matterbridgeVersion = '3.5.0';
   });
 
   it('should initialize platform with config name', () => {
