@@ -72,7 +72,6 @@ describe('TestPlatform', () => {
   });
 
   it('should return an instance of Platform', async () => {
-    matterbridge.matterbridgeVersion = '3.5.0';
     platform = initializePlugin(matterbridge, log, config);
     expect(platform).toBeInstanceOf(Platform);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Initializing platform:', config.name);
