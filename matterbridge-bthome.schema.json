@@ -4,18 +4,21 @@
   "type": "object",
   "properties": {
     "name": {
+      "title": "Plugin Name",
       "description": "Plugin name",
       "type": "string",
       "readOnly": true,
       "ui:widget": "hidden"
     },
     "type": {
+      "title": "Plugin Type",
       "description": "Plugin type",
       "type": "string",
       "readOnly": true,
       "ui:widget": "hidden"
     },
     "version": {
+      "title": "Plugin Version",
       "description": "Plugin version",
       "type": "string",
       "readOnly": true,
@@ -23,6 +26,7 @@
       "ui:widget": "hidden"
     },
     "whiteList": {
+      "title": "White List",
       "description": "Only the BTHome devices in the list will be exposed. If the list is empty, all the BTHome devices will be exposed.",
       "type": "array",
       "items": {
@@ -32,6 +36,7 @@
       "selectFrom": "serial"
     },
     "blackList": {
+      "title": "Black List",
       "description": "The BTHome devices in the list will not be exposed. If the list is empty, no BTHome devices will be excluded.",
       "type": "array",
       "items": {
@@ -41,6 +46,7 @@
       "selectFrom": "serial"
     },
     "delete": {
+      "title": "Delete Device",
       "description": "Delete a device from the storage. This will remove the devices from the storage and from the controller(s).",
       "type": "boolean",
       "buttonField": "Delete",
@@ -50,6 +56,7 @@
       "default": false
     },
     "reset": {
+      "title": "Reset Storage",
       "description": "Reset the storage. This will remove all the devices from the storage and from the controller(s).",
       "type": "boolean",
       "buttonText": "Reset",
@@ -58,11 +65,13 @@
       "default": false
     },
     "debug": {
+      "title": "Enable Debug",
       "description": "Enable the debug for the plugin.",
       "type": "boolean",
       "default": false
     },
     "unregisterOnShutdown": {
+      "title": "Unregister On Shutdown",
       "description": "Unregister all devices on shutdown. This will remove all devices from the controller when the plugin is stopped.",
       "type": "boolean",
       "default": false

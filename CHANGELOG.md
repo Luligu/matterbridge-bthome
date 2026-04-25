@@ -5,10 +5,10 @@
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge/latest?label=docker%20version)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge?label=docker%20pulls)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-bthome/actions/workflows/build.yml/badge.svg)
-[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://github.com/prettier/prettier)
-[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://github.com/eslint/eslint)
+[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://prettier.io/)
+[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://eslint.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![ESM](https://img.shields.io/badge/ESM-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/api/esm.html)
+[![ESM](https://img.shields.io/badge/ESM-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![matterbridge.io](https://img.shields.io/badge/matterbridge.io-online-brightgreen)](https://matterbridge.io)
 
 [![powered by](https://img.shields.io/badge/powered%20by-matterbridge-blue)](https://www.npmjs.com/package/matterbridge)
@@ -23,6 +23,39 @@ All notable changes to this project will be documented in this file.
 If you like this project and find it useful, please consider giving it a star on [GitHub](https://github.com/Luligu/matterbridge-bthome) and sponsoring it.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
+
+## [1.0.5] - Dev branch
+
+- [package]: Preliminary compatibility update to `matterbridge 3.8.0`, matter 1.5.1 and matter.js 0.17.0.
+- [package]: Update dependencies.
+- [package]: Bump package to `automator` v.3.1.6.
+- [package]: Bump `node-ansi-logger` to v.3.2.1.
+- [package]: Bump `node-persist-manager` to v.2.0.2.
+- [package]: Bump `prettier` to v.3.8.2.
+- [package]: Bump `typescript` to v.6.0.3.
+- [package]: Bump `eslint` to v.10.2.1.
+- [package]: Bump `typescript-eslint` to v.8.59.0.
+- [package]: Add `.vscode\tasks.json`.
+- [package]: Add `.vscode\settings.json`.
+- [devcontainer]: Add `Claude Code for VS Code extension` to Dev Container.
+- [agent]: Add `.github\copilot-instructions.md` for copilot.
+- [agent]: Add `.claude\CLAUDE.md` for claude.
+- [agent]: Add agent custom instructions (`testing`) for copilot and claude.
+- [agent]: Add agent custom instructions (`matterbridge`) for copilot and claude.
+- [devcontainer]: Fix pull of new image.
+- [devcontainer]: Update VS Code settings.
+- [devcontainer]: Leave matterbridge scripts in the cloned repo.
+- [scripts]: Update mb-run script.
+- [scripts]: Update package watch script.
+- [scripts]: Add prune-releases script.
+- [devcontainer]: Update `Dev Container` configuration.
+- [devcontainer]: Add `postStartCommand` to the Dev Container configuration.
+- [package]: Refactor `build.yml` to use matterbridge dev branch for push and main for pull requests.
+- [package]: Add `type checking` script for Jest tests.
+- [package]: Update actions versions in workflows.
+- [package]: Add `CODE_OF_CONDUCT.md`.
+
+<a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
 ## [1.0.4] - 2026-02-07
 

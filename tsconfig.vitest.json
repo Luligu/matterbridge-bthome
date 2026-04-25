@@ -1,5 +1,13 @@
 {
-  "extends": "./tsconfig.json",
-  "include": ["vitest/*.spec.ts", "vitest/*.test.ts"],
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["node", "vitest/globals"],
+    "rootDir": ".",
+    "noEmit": true,
+    "composite": false,
+    "incremental": false,
+    "isolatedModules": true
+  },
+  "include": ["**/vitest/**/*.spec.ts", "**/vitest/**/*.test.ts"],
   "exclude": []
 }

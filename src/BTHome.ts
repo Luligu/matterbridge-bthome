@@ -26,9 +26,9 @@
 
 import { EventEmitter } from 'node:events';
 
-import { hasParameter, isValidNumber, isValidString } from 'matterbridge/utils';
-import { AnsiLogger, LogLevel, TimestampFormat, nf, BLUE, GREEN, MAGENTA, YELLOW } from 'matterbridge/logger';
 import type { Noble, Peripheral, PeripheralAddressType, PeripheralAdvertisement, PeripheralState, Service } from '@stoprocent/noble';
+import { AnsiLogger, BLUE, GREEN, LogLevel, MAGENTA, nf, TimestampFormat, YELLOW } from 'matterbridge/logger';
+import { hasParameter, isValidNumber, isValidString } from 'matterbridge/utils';
 import { CYAN } from 'node-ansi-logger';
 
 import { decodeBTHome } from './BTHomeDecoder.js';

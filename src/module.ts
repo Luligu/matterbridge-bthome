@@ -38,7 +38,7 @@ import {
   pressureSensor,
   temperatureSensor,
 } from 'matterbridge';
-import { AnsiLogger, db, debugStringify, idn, rs, BLUE, LogLevel, nf } from 'matterbridge/logger';
+import { AnsiLogger, BLUE, db, debugStringify, idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import { NumberTag } from 'matterbridge/matter';
 
 import { BTHome, BTHomeDevice } from './BTHome.js';

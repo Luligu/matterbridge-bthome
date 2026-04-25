@@ -1,11 +1,7 @@
-const MATTER_PORT = 6000;
 const NAME = 'Platform';
-const HOMEDIR = path.join('jest', NAME);
-
-import path from 'node:path';
+const MATTER_PORT = 6000;
 
 import { jest } from '@jest/globals';
-import { idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import {
   addMatterbridgePlatform,
   createMatterbridgeEnvironment,
@@ -13,13 +9,15 @@ import {
   log,
   loggerLogSpy,
   matterbridge,
+  setDebug,
   setupTest,
   startMatterbridgeEnvironment,
   stopMatterbridgeEnvironment,
 } from 'matterbridge/jestutils';
+import { idn, LogLevel, nf, rs } from 'matterbridge/logger';
 
-import initializePlugin, { BTHomePlatformConfig, Platform } from './module.js';
 import { BTHome } from './BTHome.js';
+import initializePlugin, { BTHomePlatformConfig, Platform } from './module.js';
 
 // Setup the test environment
 await setupTest(NAME, false);
@@ -48,7 +46,7 @@ describe('TestPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createMatterbridgeEnvironment(NAME);
+    await createMatterbridgeEnvironment();
     await startMatterbridgeEnvironment(MATTER_PORT);
   });
 
@@ -58,8 +56,8 @@ describe('TestPlatform', () => {
   });
 
   afterEach(async () => {
-    // Cleanup after each test
-    jest.clearAllMocks();
+    // Clear debug
+    await setDebug(false);
   });
 
   afterAll(async () => {
