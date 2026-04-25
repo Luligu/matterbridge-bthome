@@ -1,10 +1,11 @@
 # <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge BTHome plugin
 
-[![npm version](https://img.shields.io/npm/v/matterbridge-eve-door.svg)](https://www.npmjs.com/package/matterbridge-eve-door)
-[![npm downloads](https://img.shields.io/npm/dt/matterbridge-eve-door.svg)](https://www.npmjs.com/package/matterbridge-eve-door)
+[![npm version](https://img.shields.io/npm/v/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
+[![npm downloads](https://img.shields.io/npm/dt/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge/latest?label=docker%20version)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge?label=docker%20pulls)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-bthome/actions/workflows/build.yml/badge.svg)
+[![codecov](https://codecov.io/gh/Luligu/matterbridge-bthome/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-bthome)
 [![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://prettier.io/)
 [![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://eslint.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
