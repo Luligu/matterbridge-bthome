@@ -214,14 +214,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         const child = matterbridgeDevice.addChildDeviceType(
           property,
           converter.deviceType,
-          index
-            ? {
-                id: property,
-                tagList: [{ mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: parseInt(index), label: null }],
-              }
-            : {
-                id: property,
-              },
+          index ? { id: property, tagList: [{ mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: parseInt(index), label: null }] } : { id: property },
         );
         if (converter.cluster === 'PowerSource') child.createDefaultPowerSourceReplaceableBatteryClusterServer();
         child.addRequiredClusterServers();
