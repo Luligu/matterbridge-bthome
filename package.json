@@ -5,18 +5,6 @@
   "author": "https://github.com/Luligu",
   "license": "Apache-2.0",
   "homepage": "https://www.npmjs.com/package/matterbridge-bthome",
-  "type": "module",
-  "main": "dist/module.js",
-  "types": "dist/module.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/module.js",
-      "types": "./dist/module.d.ts"
-    }
-  },
-  "bin": {
-    "bthome": "./bin/bthome.js"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Luligu/matterbridge-bthome.git"
@@ -63,8 +51,20 @@
     "hass",
     "hassio"
   ],
+  "type": "module",
+  "main": "dist/module.js",
+  "types": "dist/module.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/module.js",
+      "types": "./dist/module.d.ts"
+    }
+  },
   "engines": {
     "node": ">=20.19.0 <21.0.0 || >=22.13.0 <23.0.0 || >=24.0.0 <25.0.0"
+  },
+  "bin": {
+    "bthome": "./bin/bthome.js"
   },
   "files": [
     "bin",
