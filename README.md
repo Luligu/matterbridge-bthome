@@ -94,7 +94,7 @@ sudo systemctl status bluetooth
 
 Should log something like:
 
-```
+```text
 ● bluetooth.service - Bluetooth service
      Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; preset: enabled)
      Active: active (running) since Fri 2025-04-25 09:17:09 CEST; 23h ago
@@ -116,7 +116,7 @@ hciconfig -a
 
 Should log something like:
 
-```
+```text
 hci0:   Type: Primary  Bus: UART
         BD Address: 50:41:1C:64:99:A1  ACL MTU: 1021:8  SCO MTU: 64:1
         UP RUNNING
@@ -150,28 +150,28 @@ Commands:
 
 list should log:
 
-```
+```text
 [bluetooth]# list
 Controller 50:41:1C:64:E8:BB matterbridge [default]
 ```
 
 list should log:
 
-```
+```text
 [bluetooth]# list
 Controller 50:41:1C:64:E8:BB matterbridge [default]
 ```
 
 power on should log:
 
-```
+```text
 [bluetooth]# power on
 Changing power on succeeded
 ```
 
 power on should log all the ble devices discovered:
 
-```
+```text
 [bluetooth]# scan on
 Discovery started
 [CHG] Controller 50:41:1C:64:E8:BB Discovering: yes
@@ -185,7 +185,7 @@ Discovery started
 
 enter exit to exit
 
-```
+```text
 exit
 ```
 
@@ -228,7 +228,7 @@ getcap "$(which node)"
 
 Add this to your systemctl service
 
-```
+```text
 [Service]
 AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
