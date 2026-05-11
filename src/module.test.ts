@@ -1,6 +1,8 @@
 const NAME = 'Platform';
 const MATTER_PORT = 6000;
 
+// Warning: the tests in this file are supposed to run sequentially.
+
 import { jest } from '@jest/globals';
 import {
   addMatterbridgePlatform,
