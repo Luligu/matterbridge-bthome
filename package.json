@@ -49,7 +49,8 @@
     "BluetoothLEScan",
     "childbridge",
     "hass",
-    "hassio"
+    "hassio",
+    "gladysassistant"
   ],
   "type": "module",
   "main": "dist/module.js",
@@ -61,7 +62,7 @@
     }
   },
   "engines": {
-    "node": ">=20.19.0 <21.0.0 || >=22.13.0 <23.0.0 || >=24.0.0 <25.0.0"
+    "node": ">=20.19.0 <21.0.0 || >=22.13.0 <23.0.0 || >=24.0.0 <25.0.0 || >=26.0.0 <27.0.0"
   },
   "bin": {
     "bthome": "./bin/bthome.js"
@@ -127,7 +128,7 @@
     "matterbridge:list": "matterbridge -list"
   },
   "dependencies": {
-    "@stoprocent/noble": "2.4.1",
+    "@stoprocent/noble": "2.5.3",
     "node-ansi-logger": "3.2.1",
     "node-persist-manager": "2.0.2"
   },
@@ -135,9 +136,9 @@
     "@eslint/js": "10.0.1",
     "@eslint/json": "1.2.0",
     "@eslint/markdown": "8.0.1",
-    "@jest/globals": "30.3.0",
+    "@jest/globals": "30.4.1",
     "@types/jest": "30.0.0",
-    "@types/node": "25.6.0",
+    "@types/node": "25.6.2",
     "cross-env": "10.1.0",
     "eslint": "10.3.0",
     "eslint-config-prettier": "10.1.8",
@@ -146,8 +147,8 @@
     "eslint-plugin-n": "18.0.1",
     "eslint-plugin-prettier": "5.5.5",
     "eslint-plugin-simple-import-sort": "13.0.0",
-    "jest": "30.3.0",
-    "npm-check-updates": "22.1.0",
+    "jest": "30.4.2",
+    "npm-check-updates": "22.1.1",
     "prettier": "3.8.3",
     "shx": "0.4.0",
     "ts-jest": "29.4.9",

@@ -27,20 +27,35 @@ If you like this project and find it useful, please consider giving it a star on
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="120"></a>
 
-## [1.0.5] - Dev branch
+## [1.0.5] - 2026-05-11
+
+### Added
+
+- [test]: Add Jest test with full coveragee.
+- [docker]: Add instructions to run the plugin with [Docker run](README.md#run-with-the-matterbridge-docker-image) and [Docker compose](README.md#run-with-the-matterbridge-docker-image-and-docker-compose).
+
+### Changed
 
 - [package]: Preliminary compatibility update to `matterbridge 3.8.0`, matter 1.5.1 and matter.js 0.17.0.
 - [package]: Update dependencies.
-- [package]: Bump package to `automator` v.3.1.6.
+- [package]: Bump package to `automator` v.3.1.8.
 - [package]: Bump `node-ansi-logger` to v.3.2.1.
 - [package]: Bump `node-persist-manager` to v.2.0.2.
-- [package]: Bump `prettier` to v.3.8.2.
+- [package]: Bump `jest` to v.30.4.2.
+- [package]: Bump `prettier` to v.3.8.3.
 - [package]: Bump `typescript` to v.6.0.3.
-- [package]: Bump `eslint` to v.10.2.1.
-- [package]: Bump `typescript-eslint` to v.8.59.0.
+- [package]: Bump `eslint` to v.10.3.0.
+- [package]: Bump `typescript-eslint` to v.8.59.2.
+- [package]: Add Node.js 26 to package `engines` field.
 - [package]: Add `.vscode\tasks.json`.
 - [package]: Add `.vscode\settings.json`.
+- [package]: Add package script `typecheck`.
+- [eslint]: Remove `eslint-plugin-promise` (not actively maintained) and add optional @typescript-eslint promise rules.
+- [workflows]: Add Node.js 26 to `build.yml` Node matrix and remove Node.js 20.
 - [devcontainer]: Add `Claude Code for VS Code extension` to Dev Container.
+- [jest]: Add `jest` v.2.0.1 config.
+- [eslint]: Add `eslint` v.2.0.2 config.
+- [prettier]: Add `prettier` v.2.0.0 config.
 - [agent]: Add `.github\copilot-instructions.md` for copilot.
 - [agent]: Add `.claude\CLAUDE.md` for claude.
 - [agent]: Add agent custom instructions (`testing`) for copilot and claude.

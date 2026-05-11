@@ -35,19 +35,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Matterbridge
 
-Follow these steps to install or update Matterbridge if it is not already installed and up to date:
-
-```bash
-npm install -g matterbridge --omit=dev
-```
-
-on Linux you may need the necessary permissions:
-
-```bash
-sudo npm install -g matterbridge --omit=dev
-```
-
-See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbridge/blob/main/README.md) for more information.
+See the complete guidelines on [Matterbridge](https://matterbridge.io/README.html#Prerequisites) for more information.
 
 ## Windows prerequisites
 
@@ -277,4 +265,83 @@ bthome --scan --bthome
 | `--address`   | Enable the filter for MAC address (e.g., `bthome --scan --address 28:68:47:fc:9a:6b 28:db:a7:b5:d1:ca --logger debug`) |
 | `--logger`    | Set the logging level (e.g., `debug`, `info`, `notice`, ...)                                                           |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+```
+
+## Run with the matterbridge Docker image
+
+If you run matterbridge with Docker you need to modify the command in order to install in the container the required debian packages:
+
+```bash
+sudo docker pull luligu/matterbridge:latest
+sudo docker stop matterbridge 2>/dev/null
+sudo docker rm matterbridge 2>/dev/null
+sudo docker run -d \
+  --name matterbridge \
+  --restart always \
+  --network host \
+  --cap-add NET_RAW \
+  --cap-add NET_ADMIN \
+  --cap-add CAP_NET_BIND_SERVICE \
+  -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro \
+  -v ~/Matterbridge:/root/Matterbridge \
+  -v ~/.matterbridge:/root/.matterbridge \
+  -v ~/.mattercert:/root/.mattercert \
+  luligu/matterbridge:latest \
+  bash -lc ' \
+    echo "Adding debian packages for BLE scanning..." && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    bluetooth bluez libbluetooth-dev libudev-dev \
+    build-essential libcap2-bin curl ca-certificates \
+    python3 python3-pip && \
+    setcap "cap_net_raw,cap_net_admin,cap_net_bind_service+eip" "$(which node)" && \
+    getcap "$(which node)" && \
+    hciconfig -a && \
+    hciconfig hci0 up && \
+    echo "Setup complete — container ready for BLE scanning." && \
+    matterbridge --docker \
+  '
+```
+
+## Run with the matterbridge Docker image and Docker compose
+
+If you run matterbridge with Docker compose you need to modify the `docker-compose.yml` service in order to install in the container the required debian packages:
+
+```yaml
+services:
+  matterbridge:
+    container_name: matterbridge
+    image: luligu/matterbridge:latest
+    restart: always
+    network_mode: host
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+      - CAP_NET_BIND_SERVICE
+    volumes:
+      - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
+      - '${HOME}/Matterbridge:/root/Matterbridge'
+      - '${HOME}/.matterbridge:/root/.matterbridge'
+      - '${HOME}/.mattercert:/root/.mattercert'
+    command: >
+      bash -lc '
+        echo "Adding debian packages for BLE scanning..." &&
+        apt-get update &&
+        apt-get upgrade -y &&
+        apt-get install -y --no-install-recommends bluetooth bluez libbluetooth-dev libudev-dev build-essential libcap2-bin curl ca-certificates python3 python3-pip &&
+        setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which node) &&
+        getcap $(which node) &&
+        hciconfig -a &&
+        hciconfig hci0 up &&
+        echo "Setup complete — container ready for BLE scanning." &&
+        matterbridge --docker
+      '
+```
+
+This will pulls the new Matterbridge image and restarts only the Matterbridge container:
+
+```bash
+sudo docker compose pull matterbridge
+sudo docker compose up -d --no-deps --force-recreate matterbridge
 ```
