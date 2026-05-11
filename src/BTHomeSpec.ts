@@ -56,7 +56,7 @@ export interface BTHomeSpecEntry {
    * @returns decoded value (string, number, object, etc.)
    */
 
-  parser?: (_buf: Buffer, _offset: number) => string | object;
+  parser?: (buf: Buffer, offset: number) => string | object;
 }
 
 // Full BTHome v2 (pulled from https://bthome.io/format/)

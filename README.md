@@ -1,14 +1,15 @@
 # <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge BTHome plugin
 
-[![npm version](https://img.shields.io/npm/v/matterbridge-eve-door.svg)](https://www.npmjs.com/package/matterbridge-eve-door)
-[![npm downloads](https://img.shields.io/npm/dt/matterbridge-eve-door.svg)](https://www.npmjs.com/package/matterbridge-eve-door)
+[![npm version](https://img.shields.io/npm/v/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
+[![npm downloads](https://img.shields.io/npm/dt/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge/latest?label=docker%20version)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge?label=docker%20pulls)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-bthome/actions/workflows/build.yml/badge.svg)
-[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://github.com/prettier/prettier)
-[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://github.com/eslint/eslint)
+[![codecov](https://codecov.io/gh/Luligu/matterbridge-bthome/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-bthome)
+[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://prettier.io/)
+[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://eslint.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
-[![ESM](https://img.shields.io/badge/ESM-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/api/esm.html)
+[![ESM](https://img.shields.io/badge/ESM-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![matterbridge.io](https://img.shields.io/badge/matterbridge.io-online-brightgreen)](https://matterbridge.io)
 
 [![powered by](https://img.shields.io/badge/powered%20by-matterbridge-blue)](https://www.npmjs.com/package/matterbridge)
@@ -34,19 +35,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Matterbridge
 
-Follow these steps to install or update Matterbridge if it is not already installed and up to date:
-
-```bash
-npm install -g matterbridge --omit=dev
-```
-
-on Linux you may need the necessary permissions:
-
-```bash
-sudo npm install -g matterbridge --omit=dev
-```
-
-See the complete guidelines on [Matterbridge](https://github.com/Luligu/matterbridge/blob/main/README.md) for more information.
+See the complete guidelines on [Matterbridge](https://matterbridge.io/README.html#Prerequisites) for more information.
 
 ## Windows prerequisites
 
@@ -93,7 +82,7 @@ sudo systemctl status bluetooth
 
 Should log something like:
 
-```
+```text
 ● bluetooth.service - Bluetooth service
      Loaded: loaded (/lib/systemd/system/bluetooth.service; enabled; preset: enabled)
      Active: active (running) since Fri 2025-04-25 09:17:09 CEST; 23h ago
@@ -115,7 +104,7 @@ hciconfig -a
 
 Should log something like:
 
-```
+```text
 hci0:   Type: Primary  Bus: UART
         BD Address: 50:41:1C:64:99:A1  ACL MTU: 1021:8  SCO MTU: 64:1
         UP RUNNING
@@ -149,28 +138,28 @@ Commands:
 
 list should log:
 
-```
+```text
 [bluetooth]# list
 Controller 50:41:1C:64:E8:BB matterbridge [default]
 ```
 
 list should log:
 
-```
+```text
 [bluetooth]# list
 Controller 50:41:1C:64:E8:BB matterbridge [default]
 ```
 
 power on should log:
 
-```
+```text
 [bluetooth]# power on
 Changing power on succeeded
 ```
 
 power on should log all the ble devices discovered:
 
-```
+```text
 [bluetooth]# scan on
 Discovery started
 [CHG] Controller 50:41:1C:64:E8:BB Discovering: yes
@@ -184,7 +173,7 @@ Discovery started
 
 enter exit to exit
 
-```
+```text
 exit
 ```
 
@@ -227,7 +216,7 @@ getcap "$(which node)"
 
 Add this to your systemctl service
 
-```
+```text
 [Service]
 AmbientCapabilities=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
 CapabilityBoundingSet=CAP_NET_BIND_SERVICE CAP_NET_RAW CAP_NET_ADMIN
@@ -276,4 +265,83 @@ bthome --scan --bthome
 | `--address`   | Enable the filter for MAC address (e.g., `bthome --scan --address 28:68:47:fc:9a:6b 28:db:a7:b5:d1:ca --logger debug`) |
 | `--logger`    | Set the logging level (e.g., `debug`, `info`, `notice`, ...)                                                           |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+```
+
+## Run with the matterbridge Docker image
+
+If you run matterbridge with Docker you need to modify the command in order to install in the container the required debian packages:
+
+```bash
+sudo docker pull luligu/matterbridge:latest
+sudo docker stop matterbridge 2>/dev/null
+sudo docker rm matterbridge 2>/dev/null
+sudo docker run -d \
+  --name matterbridge \
+  --restart always \
+  --network host \
+  --cap-add NET_RAW \
+  --cap-add NET_ADMIN \
+  --cap-add CAP_NET_BIND_SERVICE \
+  -v /var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket:ro \
+  -v ~/Matterbridge:/root/Matterbridge \
+  -v ~/.matterbridge:/root/.matterbridge \
+  -v ~/.mattercert:/root/.mattercert \
+  luligu/matterbridge:latest \
+  bash -lc ' \
+    echo "Adding debian packages for BLE scanning..." && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends \
+    bluetooth bluez libbluetooth-dev libudev-dev \
+    build-essential libcap2-bin curl ca-certificates \
+    python3 python3-pip && \
+    setcap "cap_net_raw,cap_net_admin,cap_net_bind_service+eip" "$(which node)" && \
+    getcap "$(which node)" && \
+    hciconfig -a && \
+    hciconfig hci0 up && \
+    echo "Setup complete — container ready for BLE scanning." && \
+    matterbridge --docker \
+  '
+```
+
+## Run with the matterbridge Docker image and Docker compose
+
+If you run matterbridge with Docker compose you need to modify the `docker-compose.yml` service in order to install in the container the required debian packages:
+
+```yaml
+services:
+  matterbridge:
+    container_name: matterbridge
+    image: luligu/matterbridge:latest
+    restart: always
+    network_mode: host
+    cap_add:
+      - NET_RAW
+      - NET_ADMIN
+      - CAP_NET_BIND_SERVICE
+    volumes:
+      - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
+      - '${HOME}/Matterbridge:/root/Matterbridge'
+      - '${HOME}/.matterbridge:/root/.matterbridge'
+      - '${HOME}/.mattercert:/root/.mattercert'
+    command: >
+      bash -lc '
+        echo "Adding debian packages for BLE scanning..." &&
+        apt-get update &&
+        apt-get upgrade -y &&
+        apt-get install -y --no-install-recommends bluetooth bluez libbluetooth-dev libudev-dev build-essential libcap2-bin curl ca-certificates python3 python3-pip &&
+        setcap cap_net_raw,cap_net_admin,cap_net_bind_service+eip $(which node) &&
+        getcap $(which node) &&
+        hciconfig -a &&
+        hciconfig hci0 up &&
+        echo "Setup complete — container ready for BLE scanning." &&
+        matterbridge --docker
+      '
+```
+
+This will pulls the new Matterbridge image and restarts only the Matterbridge container:
+
+```bash
+sudo docker compose pull matterbridge
+sudo docker compose up -d --no-deps --force-recreate matterbridge
 ```
