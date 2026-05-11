@@ -127,13 +127,13 @@ export default defineConfig([
         },
       ],
       // Eventually we want to enable these rules, but they may cause many errors
-      // '@typescript-eslint/no-floating-promises': 'error', // Require unhandled promises to be explicitly voided or awaited
-      // '@typescript-eslint/no-misused-promises': 'error', // Disallow promises in non-async callbacks or boolean conditions
-      // '@typescript-eslint/await-thenable': 'error', // Disallow awaiting non-Promise values
-      // '@typescript-eslint/return-await': ['error', 'in-try-catch'], // Require return await inside try-catch so rejections are caught locally
-      // '@typescript-eslint/only-throw-error': 'error', // Require only Error objects to be thrown or rejected
-      // '@typescript-eslint/promise-function-async': 'warn', // Require Promise-returning functions to be async
-      // '@typescript-eslint/require-await': 'warn', // Disallow async functions without any await expression
+      '@typescript-eslint/no-floating-promises': 'error', // Require unhandled promises to be explicitly voided or awaited
+      '@typescript-eslint/no-misused-promises': 'error', // Disallow promises in non-async callbacks or boolean conditions
+      '@typescript-eslint/await-thenable': 'error', // Disallow awaiting non-Promise values
+      '@typescript-eslint/return-await': ['error', 'in-try-catch'], // Require return await inside try-catch so rejections are caught locally
+      '@typescript-eslint/only-throw-error': 'error', // Require only Error objects to be thrown or rejected
+      '@typescript-eslint/promise-function-async': 'warn', // Require Promise-returning functions to be async
+      '@typescript-eslint/require-await': 'warn', // Disallow async functions without any await expression
     },
   },
   {

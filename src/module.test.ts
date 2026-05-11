@@ -202,13 +202,14 @@ describe('TestPlatform', () => {
     savePeripheralsSpy.mockRestore();
   });
 
-  it('should add and save peripherals when btHome emits discovered', () => {
+  it('should add and save peripherals when btHome emits discovered', async () => {
     const platformWithAddDevice = platform as unknown as { addDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithSavePeripherals = platform as unknown as { savePeripherals: () => Promise<void> };
     const addDeviceSpy = jest.spyOn(platformWithAddDevice, 'addDevice').mockImplementation(async () => undefined);
     const savePeripheralsSpy = jest.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => undefined);
 
     platform.btHome.emit('discovered', device);
+    await Promise.resolve();
 
     expect(addDeviceSpy).toHaveBeenCalledWith(device);
     expect(savePeripheralsSpy).toHaveBeenCalled();

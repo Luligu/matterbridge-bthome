@@ -21,7 +21,7 @@ interface InternalBTHome {
     startScanningAsync: (services: string[], allowDuplicates: boolean) => Promise<void>;
     stopScanningAsync: () => Promise<void>;
   };
-  handleDiscovery: (peripheral: TestPeripheral) => Promise<void>;
+  handleDiscovery: (peripheral: TestPeripheral) => void;
   isBTHomePeripheral: (peripheral: TestPeripheral) => boolean;
   isShellyBlePeripheral: (peripheral: TestPeripheral) => boolean;
   waitForPoweredOn: () => Promise<void>;
@@ -193,7 +193,7 @@ describe('TestPlatform', () => {
     bthome.on('discovered', discoveredListener);
     bthome.on('update', updatedListener);
 
-    await internal.handleDiscovery(peripheral);
+    internal.handleDiscovery(peripheral);
 
     expect(bthome.blePeripherals.get(peripheral.id)?.localName).toBe('Shelly BLU HT');
     expect(bthome.bthomePeripherals.get(peripheral.address)).toMatchObject({
@@ -215,7 +215,7 @@ describe('TestPlatform', () => {
   test('should store an empty BLE local name when filterBle is enabled and the advertisement name is missing', async () => {
     const bthome = new BTHome(true, false, false, [], LogLevel.DEBUG);
 
-    await asInternal(bthome).handleDiscovery(
+    asInternal(bthome).handleDiscovery(
       createPeripheral({
         advertisement: {
           localName: undefined,
@@ -283,7 +283,7 @@ describe('TestPlatform', () => {
       lastSeen: new Date('2026-04-25T10:00:00.000Z'),
     });
 
-    await internal.handleDiscovery(peripheral);
+    internal.handleDiscovery(peripheral);
 
     expect(bthome.blePeripherals.get(peripheral.id)).toMatchObject({
       rssi: -44,
@@ -339,7 +339,7 @@ describe('TestPlatform', () => {
       lastSeen: new Date('2026-04-25T10:00:00.000Z'),
     });
 
-    await asInternal(bthome).handleDiscovery(peripheral);
+    asInternal(bthome).handleDiscovery(peripheral);
 
     expect(bthome.blePeripherals.get(peripheral.id)).toMatchObject({
       localName: '',
@@ -353,7 +353,7 @@ describe('TestPlatform', () => {
     const bthome = new BTHome(false, false, false, [], LogLevel.DEBUG);
     const internal = asInternal(bthome);
 
-    await internal.handleDiscovery(
+    internal.handleDiscovery(
       createPeripheral({
         advertisement: {
           localName: 'Generic Sensor',
@@ -372,7 +372,7 @@ describe('TestPlatform', () => {
   test('should treat a Shelly BLE peripheral without BTHome service data as Shelly only', async () => {
     const bthome = new BTHome(false, false, false, [], LogLevel.DEBUG);
 
-    await asInternal(bthome).handleDiscovery(
+    asInternal(bthome).handleDiscovery(
       createPeripheral({
         advertisement: {
           localName: 'Shelly Plus Plug',
@@ -414,9 +414,9 @@ describe('TestPlatform', () => {
       },
     });
 
-    await asInternal(new BTHome(false, true, false, [], LogLevel.DEBUG)).handleDiscovery(nonBTHomePeripheral);
-    await asInternal(new BTHome(false, false, true, [], LogLevel.DEBUG)).handleDiscovery(nonShellyBTHomePeripheral);
-    await asInternal(new BTHome(false, false, false, ['aa:bb:cc:dd:ee:ff'], LogLevel.DEBUG)).handleDiscovery(addressFilteredPeripheral);
+    asInternal(new BTHome(false, true, false, [], LogLevel.DEBUG)).handleDiscovery(nonBTHomePeripheral);
+    asInternal(new BTHome(false, false, true, [], LogLevel.DEBUG)).handleDiscovery(nonShellyBTHomePeripheral);
+    asInternal(new BTHome(false, false, false, ['aa:bb:cc:dd:ee:ff'], LogLevel.DEBUG)).handleDiscovery(addressFilteredPeripheral);
 
     expect(loggerLogSpy).not.toHaveBeenCalledWith(LogLevel.DEBUG, expect.stringContaining('Message from'));
   });
@@ -680,7 +680,7 @@ describe('TestPlatform', () => {
   test('should fallback to a generated name and packet id zero for new BTHome devices without a valid local name or packet id', async () => {
     const bthome = new BTHome(false, true, false, [], LogLevel.DEBUG);
 
-    await asInternal(bthome).handleDiscovery(
+    asInternal(bthome).handleDiscovery(
       createPeripheral({
         address: '22:33:44:55:66:77',
         advertisement: {
@@ -716,7 +716,7 @@ describe('TestPlatform', () => {
       lastSeen: new Date('2026-04-25T10:00:00.000Z'),
     });
 
-    await asInternal(bthome).handleDiscovery(
+    asInternal(bthome).handleDiscovery(
       createPeripheral({
         address: '33:44:55:66:77:88',
         advertisement: {
