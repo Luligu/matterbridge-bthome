@@ -1,6 +1,6 @@
 <!-- eslint-disable markdown/no-missing-label-refs -->
 
-# <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge webhooks plugin changelog
+# <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge bthome plugin changelog
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
 [![npm downloads](https://img.shields.io/npm/dt/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
@@ -31,7 +31,7 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Added
 
-- [test]: Add Jest test with full coveragee.
+- [test]: Add Jest test with full coverage.
 - [docker]: Add instructions to run the plugin with [Docker run](README.md#run-with-the-matterbridge-docker-image) and [Docker compose](README.md#run-with-the-matterbridge-docker-image-and-docker-compose).
 
 ### Changed
