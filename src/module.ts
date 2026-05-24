@@ -118,6 +118,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
     await this.loadPeripherals();
 
     // Start the BTHome discovery
+    this.btHome.log.logLevel = this.log.logLevel;
     await this.btHome.start();
   }
 
@@ -158,6 +159,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
   // eslint-disable-next-line @typescript-eslint/require-await
   override async onChangeLoggerLevel(logLevel: LogLevel) {
     this.log.info(`Changing logger level for platform ${idn}${this.config.name}${rs}${nf} to ${logLevel}`);
+    this.btHome.log.logLevel = logLevel;
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
   }
 

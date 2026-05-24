@@ -29,6 +29,8 @@ If you like this project and find it useful, please consider giving it a star on
 
 ## [1.0.6] - Dev branch
 
+### Changed
+
 - [package]: Update dependencies.
 - [package]: Bump package to `automator` v.3.1.10.
 - [package]: Bump `eslint` to v.10.4.0.
@@ -45,6 +47,10 @@ If you like this project and find it useful, please consider giving it a star on
 - [package]: Add `.vscode/extensions.json`.
 - [package]: Refactor `scripts`.
 - [eslint]: Add `eslint` v.2.0.4 config.
+
+### Fixed
+
+- [bthome]: Fix logger level.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
 
