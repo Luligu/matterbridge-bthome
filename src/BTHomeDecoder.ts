@@ -66,7 +66,7 @@ export function decodeBTHome(buf: Buffer): DecodedBTHome {
 
     if (!spec) {
       // First unknown: dump remainder and stop cause we don't know how to handle the length of the unknown field
-      unknown.push(`0x${id.toString(16)} → 0x${buf.slice(offset - 1).toString('hex')}`);
+      unknown.push(`0x${id.toString(16)} → 0x${buf.subarray(offset - 1).toString('hex')}`);
       break;
     }
 

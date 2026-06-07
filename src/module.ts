@@ -73,8 +73,8 @@ export class Platform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.7.0')) {
-      throw new Error(`This plugin requires Matterbridge version >= "3.7.0". Please update Matterbridge to the latest version in the frontend.`);
+    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.8.0')) {
+      throw new Error(`This plugin requires Matterbridge version >= "3.8.0". Please update Matterbridge to the latest version in the frontend.`);
     }
 
     this.log.info('Initializing platform:', this.config.name);
@@ -253,7 +253,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         continue;
       }
       if (converter && converter.deviceType && converter.cluster && converter.attribute) {
-        const child = matterbridgeDevice.getChildEndpointByName(property);
+        const child = matterbridgeDevice.getChildEndpointById(property);
         let value = device.data[property];
         if (converter.factor && typeof value === 'number') value = value * converter.factor;
         if (converter.type === 'boolean' && typeof value === 'number') value = device.data[property] !== 0;
@@ -266,7 +266,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         }
       }
       if (converter && converter.deviceType && converter.cluster === 'Switch') {
-        const child = matterbridgeDevice.getChildEndpointByName(property);
+        const child = matterbridgeDevice.getChildEndpointById(property);
         const value = device.data[property];
         if (child) {
           if (value === 'single_press') await child.triggerSwitchEvent('Single', child.log);

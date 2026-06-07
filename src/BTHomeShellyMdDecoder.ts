@@ -131,7 +131,7 @@ export function decodeShellyManufacturerData(input: Buffer | string): ShellyManu
 
       case 0x0a: {
         // MAC (6 bytes)
-        const macBytes = buf.slice(offset, offset + 6);
+        const macBytes = buf.subarray(offset, offset + 6);
         offset += 6;
         result.mac = macBytes.toString('hex').match(/.{2}/g)?.join(':');
         break;
