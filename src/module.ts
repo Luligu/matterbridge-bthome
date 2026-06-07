@@ -40,6 +40,7 @@ import {
 } from 'matterbridge';
 import { AnsiLogger, BLUE, db, debugStringify, idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import { NumberTag } from 'matterbridge/matter';
+import { fireAndForget } from 'matterbridge/utils';
 
 import { BTHome, BTHomeDevice } from './BTHome.js';
 
@@ -80,26 +81,34 @@ export class Platform extends MatterbridgeDynamicPlatform {
     this.log.info('Initializing platform:', this.config.name);
 
     this.btHome.on('discovered', (device: BTHomeDevice) => {
-      void (async () => {
-        this.log.notice(`Discovered new BTHome device: ${device.mac}`);
-        this.log.info('- name:', device.localName);
-        this.log.info('- rssi:', device.rssi);
-        this.log.info('- version:', device.version);
-        this.log.info('- encrypted:', device.encrypted);
-        this.log.info('- trigger:', device.trigger);
-        this.log.info('- data:', debugStringify(device.data));
-        await this.addDevice(device);
-        await this.savePeripherals();
-      })();
+      fireAndForget(
+        (async () => {
+          this.log.notice(`Discovered new BTHome device: ${device.mac}`);
+          this.log.info('- name:', device.localName);
+          this.log.info('- rssi:', device.rssi);
+          this.log.info('- version:', device.version);
+          this.log.info('- encrypted:', device.encrypted);
+          this.log.info('- trigger:', device.trigger);
+          this.log.info('- data:', debugStringify(device.data));
+          await this.addDevice(device);
+          await this.savePeripherals();
+        })(),
+        this.log,
+        'Error while handling discovered BTHome device',
+      );
     });
 
     this.btHome.on('update', (device: BTHomeDevice) => {
-      void (async () => {
-        this.log.info(
-          `${db}BTHome message from ${idn}${device.mac}${rs}${db} rssi ${BLUE}${device.rssi}${db} name ${BLUE}${device.localName}${db} version ${BLUE}${device.version}${db} ${BLUE}${device.encrypted ? 'encrypted ' : ''}${device.trigger ? 'trigger ' : ''}${db}data ${debugStringify(device.data)}`,
-        );
-        await this.updateDevice(device);
-      })();
+      fireAndForget(
+        (async () => {
+          this.log.info(
+            `${db}BTHome message from ${idn}${device.mac}${rs}${db} rssi ${BLUE}${device.rssi}${db} name ${BLUE}${device.localName}${db} version ${BLUE}${device.version}${db} ${BLUE}${device.encrypted ? 'encrypted ' : ''}${device.trigger ? 'trigger ' : ''}${db}data ${debugStringify(device.data)}`,
+          );
+          await this.updateDevice(device);
+        })(),
+        this.log,
+        'Error while handling updated BTHome device',
+      );
     });
 
     this.log.info('Finished initializing platform:', this.config.name);
