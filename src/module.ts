@@ -40,6 +40,7 @@ import {
 } from 'matterbridge';
 import { AnsiLogger, BLUE, db, debugStringify, idn, LogLevel, nf, rs } from 'matterbridge/logger';
 import { NumberTag } from 'matterbridge/matter';
+import { fireAndForget } from 'matterbridge/utils';
 
 import { BTHome, BTHomeDevice } from './BTHome.js';
 
@@ -73,29 +74,41 @@ export class Platform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.7.0')) {
-      throw new Error(`This plugin requires Matterbridge version >= "3.7.0". Please update Matterbridge to the latest version in the frontend.`);
+    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.8.0')) {
+      throw new Error(`This plugin requires Matterbridge version >= "3.8.0". Please update Matterbridge to the latest version in the frontend.`);
     }
 
     this.log.info('Initializing platform:', this.config.name);
 
-    this.btHome.on('discovered', async (device: BTHomeDevice) => {
-      this.log.notice(`Discovered new BTHome device: ${device.mac}`);
-      this.log.info('- name:', device.localName);
-      this.log.info('- rssi:', device.rssi);
-      this.log.info('- version:', device.version);
-      this.log.info('- encrypted:', device.encrypted);
-      this.log.info('- trigger:', device.trigger);
-      this.log.info('- data:', debugStringify(device.data));
-      this.addDevice(device);
-      await this.savePeripherals();
+    this.btHome.on('discovered', (device: BTHomeDevice) => {
+      fireAndForget(
+        (async () => {
+          this.log.notice(`Discovered new BTHome device: ${device.mac}`);
+          this.log.info('- name:', device.localName);
+          this.log.info('- rssi:', device.rssi);
+          this.log.info('- version:', device.version);
+          this.log.info('- encrypted:', device.encrypted);
+          this.log.info('- trigger:', device.trigger);
+          this.log.info('- data:', debugStringify(device.data));
+          await this.addDevice(device);
+          await this.savePeripherals();
+        })(),
+        this.log,
+        'Error while handling discovered BTHome device',
+      );
     });
 
-    this.btHome.on('update', async (device: BTHomeDevice) => {
-      this.log.info(
-        `${db}BTHome message from ${idn}${device.mac}${rs}${db} rssi ${BLUE}${device.rssi}${db} name ${BLUE}${device.localName}${db} version ${BLUE}${device.version}${db} ${BLUE}${device.encrypted ? 'encrypted ' : ''}${device.trigger ? 'trigger ' : ''}${db}data ${debugStringify(device.data)}`,
+    this.btHome.on('update', (device: BTHomeDevice) => {
+      fireAndForget(
+        (async () => {
+          this.log.info(
+            `${db}BTHome message from ${idn}${device.mac}${rs}${db} rssi ${BLUE}${device.rssi}${db} name ${BLUE}${device.localName}${db} version ${BLUE}${device.version}${db} ${BLUE}${device.encrypted ? 'encrypted ' : ''}${device.trigger ? 'trigger ' : ''}${db}data ${debugStringify(device.data)}`,
+          );
+          await this.updateDevice(device);
+        })(),
+        this.log,
+        'Error while handling updated BTHome device',
       );
-      await this.updateDevice(device);
     });
 
     this.log.info('Finished initializing platform:', this.config.name);
@@ -114,15 +127,16 @@ export class Platform extends MatterbridgeDynamicPlatform {
     await this.loadPeripherals();
 
     // Start the BTHome discovery
+    this.btHome.log.logLevel = this.log.logLevel;
     await this.btHome.start();
   }
 
   override async onConfigure(): Promise<void> {
     await super.onConfigure();
     this.log.info('onConfigure called');
-    this.btHome.bthomePeripherals.forEach(async (device) => {
-      this.updateDevice(device);
-    });
+    for (const device of this.btHome.bthomePeripherals.values()) {
+      await this.updateDevice(device);
+    }
   }
 
   override async onAction(action: string, value?: string, id?: string): Promise<void> {
@@ -137,7 +151,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
       this.btHome.bthomePeripherals.delete(value);
       await this.savePeripherals();
       const device = this.bridgedDevices.get(value);
-      if (device) this.unregisterDevice(device);
+      if (device) await this.unregisterDevice(device);
       this.bridgedDevices.delete(value);
       this.log.notice(`The device ${value} has been deleted. Please restart the plugin.`);
     }
@@ -145,14 +159,16 @@ export class Platform extends MatterbridgeDynamicPlatform {
       await this.btHome.stop();
       this.btHome.bthomePeripherals.clear();
       await this.savePeripherals();
-      this.unregisterAllDevices();
+      await this.unregisterAllDevices();
       this.bridgedDevices.clear();
       this.log.notice('The storage has been reset');
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/require-await
   override async onChangeLoggerLevel(logLevel: LogLevel) {
     this.log.info(`Changing logger level for platform ${idn}${this.config.name}${rs}${nf} to ${logLevel}`);
+    this.btHome.log.logLevel = logLevel;
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
   }
 
@@ -246,7 +262,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         continue;
       }
       if (converter && converter.deviceType && converter.cluster && converter.attribute) {
-        const child = matterbridgeDevice.getChildEndpointByName(property);
+        const child = matterbridgeDevice.getChildEndpointById(property);
         let value = device.data[property];
         if (converter.factor && typeof value === 'number') value = value * converter.factor;
         if (converter.type === 'boolean' && typeof value === 'number') value = device.data[property] !== 0;
@@ -259,7 +275,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         }
       }
       if (converter && converter.deviceType && converter.cluster === 'Switch') {
-        const child = matterbridgeDevice.getChildEndpointByName(property);
+        const child = matterbridgeDevice.getChildEndpointById(property);
         const value = device.data[property];
         if (child) {
           if (value === 'single_press') await child.triggerSwitchEvent('Single', child.log);

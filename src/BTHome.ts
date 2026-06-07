@@ -208,7 +208,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
    *
    * @param {Peripheral} peripheral - The discovered peripheral.
    */
-  private async handleDiscovery(peripheral: Peripheral) {
+  private handleDiscovery(peripheral: Peripheral): void {
     if (this.filterBle) {
       let assignedNumber: string | undefined = undefined;
       let manufacturerData: string | undefined = undefined;
@@ -504,23 +504,27 @@ if (process.argv.includes('--scan')) {
     hasParameter('logger') ? (process.argv[process.argv.indexOf('--logger') + 1] as LogLevel) : LogLevel.DEBUG,
   );
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   process.on('SIGINT', async () => {
     bthome.logDevices();
     await bthome.stop();
     process.exit(0);
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   process.on('SIGTERM', async () => {
     bthome.logDevices();
     await bthome.stop();
     process.exit(0);
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   process.on('uncaughtException', async (error) => {
     bthome.log.error('BTHome uncaught Exception:', error);
     await bthome.stop();
   });
 
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
   process.on('unhandledRejection', async (reason) => {
     bthome.log.error('BTHome unhandled Rejection:', reason);
     await bthome.stop();

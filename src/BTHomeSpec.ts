@@ -106,7 +106,7 @@ export const BTHOME_SPEC: Readonly<Record<number, BTHomeSpecEntry>> = {
     // UTF‑8 text
     name: 'text',
     parser(buf: Buffer, off: number) {
-      return buf.slice(off + 1, off + 1 + buf[off]).toString('utf8');
+      return buf.subarray(off + 1, off + 1 + buf[off]).toString('utf8');
     },
     bytes: null,
   },
@@ -114,7 +114,7 @@ export const BTHOME_SPEC: Readonly<Record<number, BTHomeSpecEntry>> = {
     // raw hex blob
     name: 'raw',
     parser(buf: Buffer, off: number) {
-      return buf.slice(off + 1, off + 1 + buf[off]).toString('hex');
+      return buf.subarray(off + 1, off + 1 + buf[off]).toString('hex');
     },
     bytes: null,
   },
@@ -216,7 +216,7 @@ export const BTHOME_SPEC: Readonly<Record<number, BTHomeSpecEntry>> = {
     signed: false,
     factor: 1,
     parser(buf: Buffer, off: number) {
-      const [rc, patch, minor, major] = buf.slice(off, off + 4);
+      const [rc, patch, minor, major] = buf.subarray(off, off + 4);
       return `${major}.${minor}.${patch}.${rc}`;
     },
   },
@@ -227,7 +227,7 @@ export const BTHOME_SPEC: Readonly<Record<number, BTHomeSpecEntry>> = {
     signed: false,
     factor: 1,
     parser(buf: Buffer, off: number) {
-      const [minor, patch, major] = buf.slice(off, off + 3);
+      const [minor, patch, major] = buf.subarray(off, off + 3);
       return `${major}.${minor}.${patch}`;
     },
   },

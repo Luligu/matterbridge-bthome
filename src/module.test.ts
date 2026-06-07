@@ -1,6 +1,8 @@
 const NAME = 'Platform';
 const MATTER_PORT = 6000;
 
+// Warning: the tests in this file are supposed to run sequentially.
+
 import { jest } from '@jest/globals';
 import {
   addMatterbridgePlatform,
@@ -92,11 +94,9 @@ describe('TestPlatform', () => {
   });
 
   it('should throw error in load when version is not valid', () => {
-    matterbridge.matterbridgeVersion = '1.5.0';
-    expect(() => new Platform(matterbridge, log, config)).toThrow(
-      'This plugin requires Matterbridge version >= "3.7.0". Please update Matterbridge to the latest version in the frontend.',
+    expect(() => new Platform({ ...matterbridge, matterbridgeVersion: '1.0.0' }, log, config)).toThrow(
+      'This plugin requires Matterbridge version >= "3.8.0". Please update Matterbridge to the latest version in the frontend.',
     );
-    matterbridge.matterbridgeVersion = '3.7.0';
   });
 
   it('should initialize platform with config name', () => {
@@ -200,13 +200,14 @@ describe('TestPlatform', () => {
     savePeripheralsSpy.mockRestore();
   });
 
-  it('should add and save peripherals when btHome emits discovered', () => {
+  it('should add and save peripherals when btHome emits discovered', async () => {
     const platformWithAddDevice = platform as unknown as { addDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithSavePeripherals = platform as unknown as { savePeripherals: () => Promise<void> };
     const addDeviceSpy = jest.spyOn(platformWithAddDevice, 'addDevice').mockImplementation(async () => undefined);
     const savePeripheralsSpy = jest.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => undefined);
 
     platform.btHome.emit('discovered', device);
+    await Promise.resolve();
 
     expect(addDeviceSpy).toHaveBeenCalledWith(device);
     expect(savePeripheralsSpy).toHaveBeenCalled();
@@ -342,7 +343,7 @@ describe('TestPlatform', () => {
       triggerSwitchEvent: jest.fn(async () => undefined),
     };
     const matterbridgeDevice = {
-      getChildEndpointByName: jest.fn((name: string) => {
+      getChildEndpointById: jest.fn((name: string) => {
         if (name === 'temperature') return temperatureChild;
         if (name === 'button') return buttonChild;
         return undefined;
@@ -353,9 +354,9 @@ describe('TestPlatform', () => {
     await platformWithUpdateDevice.updateDevice(deviceToUpdate);
 
     expect(validateDeviceSpy).toHaveBeenCalledWith(deviceToUpdate.mac, false);
-    expect(matterbridgeDevice.getChildEndpointByName).toHaveBeenCalledWith('temperature');
+    expect(matterbridgeDevice.getChildEndpointById).toHaveBeenCalledWith('temperature');
     expect(temperatureChild.updateAttribute).toHaveBeenCalledWith('TemperatureMeasurement', 'measuredValue', 2150, temperatureChild.log);
-    expect(matterbridgeDevice.getChildEndpointByName).toHaveBeenCalledWith('button');
+    expect(matterbridgeDevice.getChildEndpointById).toHaveBeenCalledWith('button');
     expect(buttonChild.triggerSwitchEvent).toHaveBeenCalledWith('Double', buttonChild.log);
     expect(deviceToUpdate.data.button).toBe('none');
 
@@ -380,9 +381,9 @@ describe('TestPlatform', () => {
       triggerSwitchEvent: jest.fn(async () => undefined),
     };
     const matterbridgeDevice = {
-      getChildEndpointByName: jest.fn((name: string) => {
-        if (name === 'occupancyState') return occupancyChild;
-        if (name === 'button') return buttonChild;
+      getChildEndpointById: jest.fn((id: string) => {
+        if (id === 'occupancyState') return occupancyChild;
+        if (id === 'button') return buttonChild;
         return undefined;
       }),
     };
@@ -391,7 +392,7 @@ describe('TestPlatform', () => {
     await platformWithUpdateDevice.updateDevice(deviceToUpdate);
 
     expect(validateDeviceSpy).toHaveBeenCalledWith(deviceToUpdate.mac, false);
-    expect(matterbridgeDevice.getChildEndpointByName).toHaveBeenCalledWith('occupancyState');
+    expect(matterbridgeDevice.getChildEndpointById).toHaveBeenCalledWith('occupancyState');
     expect(occupancyChild.updateAttribute).toHaveBeenCalledWith('OccupancySensing', 'occupancy', { occupied: true }, occupancyChild.log);
     expect(buttonChild.triggerSwitchEvent).toHaveBeenCalledWith('Long', buttonChild.log);
     expect(deviceToUpdate.data.button).toBe('none');
@@ -399,6 +400,48 @@ describe('TestPlatform', () => {
       LogLevel.DEBUG,
       `***No converter found for property unknownReading in device mac ${deviceToUpdate.mac} model ${deviceToUpdate.localName}`,
     );
+
+    platform.bridgedDevices.clear();
+    validateDeviceSpy.mockRestore();
+  });
+
+  it('should log debug for unknown readings, update with converter.property, and trigger long press', async () => {
+    const deviceToUpdate: BTHomeDevice = {
+      ...device,
+      data: { occupancyState: 1, unknownReading: 99, button: 'long_press' },
+    };
+    const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
+    const platformWithValidateDevice = platform as unknown as { validateDevice: (id: string, add: boolean) => boolean };
+    const validateDeviceSpy = jest.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
+    const occupancyChild = {
+      log: {},
+      updateAttribute: jest.fn(async () => undefined),
+    };
+    const buttonChild = {
+      log: {},
+      triggerSwitchEvent: jest.fn(async () => undefined),
+    };
+    const matterbridgeDevice = {
+      getChildEndpointById: jest.fn((id: string) => {
+        if (id === 'occupancyState') return occupancyChild;
+        if (id === 'button') return buttonChild;
+        return undefined;
+      }),
+    };
+
+    platform.bridgedDevices.set(deviceToUpdate.mac, matterbridgeDevice as never);
+    await platformWithUpdateDevice.updateDevice(deviceToUpdate);
+
+    // lines 252-253: no converter → debug log and continue
+    expect(loggerLogSpy).toHaveBeenCalledWith(
+      LogLevel.DEBUG,
+      `***No converter found for property unknownReading in device mac ${deviceToUpdate.mac} model ${deviceToUpdate.localName}`,
+    );
+    // line 263: converter.property present → value wrapped in object
+    expect(occupancyChild.updateAttribute).toHaveBeenCalledWith('OccupancySensing', 'occupancy', { occupied: true }, occupancyChild.log);
+    // line 274: long_press branch
+    expect(buttonChild.triggerSwitchEvent).toHaveBeenCalledWith('Long', buttonChild.log);
+    expect(deviceToUpdate.data.button).toBe('none');
 
     platform.bridgedDevices.clear();
     validateDeviceSpy.mockRestore();
