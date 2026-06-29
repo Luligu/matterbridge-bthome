@@ -25,24 +25,24 @@
 import {
   bridgedNode,
   contactSensor,
-  DeviceTypeDefinition,
+  type DeviceTypeDefinition,
   genericSwitch,
   humiditySensor,
   lightSensor,
   MatterbridgeDynamicPlatform,
   MatterbridgeEndpoint,
   occupancySensor,
-  PlatformConfig,
-  PlatformMatterbridge,
+  type PlatformConfig,
+  type PlatformMatterbridge,
   powerSource,
   pressureSensor,
   temperatureSensor,
 } from 'matterbridge';
-import { AnsiLogger, BLUE, db, debugStringify, idn, LogLevel, nf, rs } from 'matterbridge/logger';
+import { type AnsiLogger, BLUE, db, debugStringify, idn, type LogLevel, nf, rs } from 'matterbridge/logger';
 import { NumberTag } from 'matterbridge/matter';
 import { fireAndForget } from 'matterbridge/utils';
 
-import { BTHome, BTHomeDevice } from './BTHome.js';
+import { BTHome, type BTHomeDevice } from './BTHome.js';
 
 export type BTHomePlatformConfig = PlatformConfig & {
   whiteList: string[];
@@ -74,15 +74,15 @@ export class Platform extends MatterbridgeDynamicPlatform {
     super(matterbridge, log, config);
 
     // Verify that Matterbridge is the correct version
-    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.8.0')) {
-      throw new Error(`This plugin requires Matterbridge version >= "3.8.0". Please update Matterbridge to the latest version in the frontend.`);
+    if (typeof this.verifyMatterbridgeVersion !== 'function' || !this.verifyMatterbridgeVersion('3.9.0')) {
+      throw new Error(`This plugin requires Matterbridge version >= "3.9.0". Please update Matterbridge to the latest version in the frontend.`);
     }
 
     this.log.info('Initializing platform:', this.config.name);
 
     this.btHome.on('discovered', (device: BTHomeDevice) => {
       fireAndForget(
-        (async () => {
+        (async (): Promise<void> => {
           this.log.notice(`Discovered new BTHome device: ${device.mac}`);
           this.log.info('- name:', device.localName);
           this.log.info('- rssi:', device.rssi);
@@ -100,7 +100,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
 
     this.btHome.on('update', (device: BTHomeDevice) => {
       fireAndForget(
-        (async () => {
+        (async (): Promise<void> => {
           this.log.info(
             `${db}BTHome message from ${idn}${device.mac}${rs}${db} rssi ${BLUE}${device.rssi}${db} name ${BLUE}${device.localName}${db} version ${BLUE}${device.version}${db} ${BLUE}${device.encrypted ? 'encrypted ' : ''}${device.trigger ? 'trigger ' : ''}${db}data ${debugStringify(device.data)}`,
           );
@@ -142,6 +142,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
   override async onAction(action: string, value?: string, id?: string): Promise<void> {
     this.log.info('onAction called with action:', action, 'and value:', value ?? 'none', 'and id:', id ?? 'none');
     if (action === 'delete' && value) {
+      // oxlint-disable-next-line no-param-reassign
       value = value.toLowerCase().trimStart().trimEnd();
       if (!this.btHome.bthomePeripherals.has(value)) {
         this.log.error(`The device ${value} is not registered. Please check the MAC address.`);
@@ -165,8 +166,8 @@ export class Platform extends MatterbridgeDynamicPlatform {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/require-await
-  override async onChangeLoggerLevel(logLevel: LogLevel) {
+  // oxlint-disable-next-line typescript/require-await
+  override async onChangeLoggerLevel(logLevel: LogLevel): Promise<void> {
     this.log.info(`Changing logger level for platform ${idn}${this.config.name}${rs}${nf} to ${logLevel}`);
     this.btHome.log.logLevel = logLevel;
     this.bridgedDevices.forEach((device) => (device.log.logLevel = logLevel));
@@ -184,7 +185,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
 
     await super.onShutdown(reason);
 
-    if (this.config.unregisterOnShutdown === true) await this.unregisterAllDevices();
+    if (this.config.unregisterOnShutdown) await this.unregisterAllDevices();
     this.bridgedDevices.clear();
     this.log.info('onShutdown finished');
   }
@@ -214,11 +215,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
   private async addDevice(device: BTHomeDevice): Promise<void> {
     this.setSelectDevice(device.mac, device.localName, undefined, 'ble');
     if (!this.validateDevice(device.mac, true)) return;
-    const matterbridgeDevice = new MatterbridgeEndpoint(
-      [bridgedNode],
-      { id: 'BTHome ' + device.mac },
-      this.config.debug as boolean,
-    ).createDefaultBridgedDeviceBasicInformationClusterServer(
+    const matterbridgeDevice = new MatterbridgeEndpoint([bridgedNode], { id: 'BTHome ' + device.mac }, this.config.debug).createDefaultBridgedDeviceBasicInformationClusterServer(
       'BTHome ' + device.mac,
       device.mac,
       this.matterbridge.aggregatorVendorId,
@@ -229,12 +226,12 @@ export class Platform extends MatterbridgeDynamicPlatform {
     for (const property in device.data) {
       const [name, index] = property.split(':');
       const converter = this.converter.find((converter) => converter.reading === name);
-      if (converter && converter.deviceType) {
+      if (converter?.deviceType) {
         this.setSelectDeviceEntity(device.mac, property, `${name}${index ? ' n. ' + index : ''}`, 'ble');
         const child = matterbridgeDevice.addChildDeviceType(
           property,
           converter.deviceType,
-          index ? { id: property, tagList: [{ mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: parseInt(index), label: null }] } : { id: property },
+          index ? { id: property, tagList: [{ mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: Number.parseInt(index), label: null }] } : { id: property },
         );
         if (converter.cluster === 'PowerSource') child.createDefaultPowerSourceReplaceableBatteryClusterServer();
         child.addRequiredClusterServers();
@@ -261,7 +258,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         this.log.debug(`***No converter found for property ${property} in device mac ${device.mac} model ${device.localName}`);
         continue;
       }
-      if (converter && converter.deviceType && converter.cluster && converter.attribute) {
+      if (converter?.deviceType && converter.cluster && converter.attribute) {
         const child = matterbridgeDevice.getChildEndpointById(property);
         let value = device.data[property];
         if (converter.factor && typeof value === 'number') value = value * converter.factor;
@@ -274,7 +271,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
           await child?.updateAttribute(converter.cluster, converter.attribute, value, child.log);
         }
       }
-      if (converter && converter.deviceType && converter.cluster === 'Switch') {
+      if (converter?.deviceType && converter.cluster === 'Switch') {
         const child = matterbridgeDevice.getChildEndpointById(property);
         const value = device.data[property];
         if (child) {

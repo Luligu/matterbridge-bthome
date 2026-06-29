@@ -1,14 +1,13 @@
 const NAME = 'BTHome';
 
-import { jest } from '@jest/globals';
 import type { PeripheralAdvertisement } from '@stoprocent/noble';
-import { loggerLogSpy, setDebug, setupTest } from 'matterbridge/jestutils';
 import { LogLevel } from 'matterbridge/logger';
+import { loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 
-import { BTHome } from './BTHome.js';
-import { decodeBTHome } from './BTHomeDecoder.js';
-import { decodeShellyManufacturerData, getShellyBluLongName, getShellyBluShortName } from './BTHomeShellyMdDecoder.js';
-import { BTHOME_SPEC } from './BTHomeSpec.js';
+import { BTHome } from '../src/BTHome.js';
+import { decodeBTHome } from '../src/BTHomeDecoder.js';
+import { decodeShellyManufacturerData, getShellyBluLongName, getShellyBluShortName } from '../src/BTHomeShellyMdDecoder.js';
+import { BTHOME_SPEC } from '../src/BTHomeSpec.js';
 
 // Setup the test environment
 await setupTest(NAME, false);
@@ -77,6 +76,7 @@ function createPeripheral(overrides: Partial<TestPeripheral> = {}): TestPeripher
 }
 
 function createShellyManufacturerData(modelId = 0x0003): Buffer {
+  // oxlint-disable-next-line no-bitwise -- packing the model id into low/high bytes for the test fixture
   return Buffer.from([0xa9, 0x0b, 0x01, 0x15, 0x00, 0x0b, modelId & 0xff, modelId >> 8, 0x0a, 0xa1, 0xb2, 0xc3, 0xd4, 0xe5, 0xf6]);
 }
 
@@ -85,7 +85,7 @@ describe('TestPlatform', () => {
 
   beforeEach(() => {
     // Reset the mock calls before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -95,7 +95,7 @@ describe('TestPlatform', () => {
 
   afterAll(async () => {
     // Restore all mocks
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should initialize scanner flags when constructed with explicit filters', () => {
@@ -174,8 +174,8 @@ describe('TestPlatform', () => {
   test('should discover a new Shelly BTHome device and enrich it with manufacturer data', async () => {
     const bthome = new BTHome(true, true, false, [], LogLevel.DEBUG);
     const internal = asInternal(bthome);
-    const discoveredListener = jest.fn();
-    const updatedListener = jest.fn();
+    const discoveredListener = vi.fn();
+    const updatedListener = vi.fn();
     const peripheral = createPeripheral({
       advertisement: {
         localName: 'Shelly BLU HT',
@@ -234,7 +234,7 @@ describe('TestPlatform', () => {
   test('should update cached BLE and BTHome devices when another BTHome advertisement arrives', async () => {
     const bthome = new BTHome(true, true, false, [], LogLevel.DEBUG);
     const internal = asInternal(bthome);
-    const updatedListener = jest.fn();
+    const updatedListener = vi.fn();
     const peripheral = createPeripheral({
       rssi: -44,
       advertisement: {
@@ -425,16 +425,16 @@ describe('TestPlatform', () => {
     const bthome = new BTHome();
     const internal = asInternal(bthome);
     let stateChangeListener: ((state: string) => void) | undefined;
-    const removeListener = jest.fn();
+    const removeListener = vi.fn();
 
     await expect(internal.waitForPoweredOn()).rejects.toThrow('Noble is not loaded');
 
     internal.noble = {
       state: 'poweredOn',
-      on: jest.fn(),
+      on: vi.fn(),
       removeListener,
-      startScanningAsync: jest.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue(),
-      stopScanningAsync: jest.fn<() => Promise<void>>().mockResolvedValue(),
+      startScanningAsync: vi.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue(),
+      stopScanningAsync: vi.fn<() => Promise<void>>().mockResolvedValue(),
     };
     await expect(internal.waitForPoweredOn()).resolves.toBeUndefined();
 
@@ -442,7 +442,7 @@ describe('TestPlatform', () => {
     await expect(internal.waitForPoweredOn()).rejects.toThrow('Bluetooth adapter not usable (state=unsupported)');
 
     internal.noble.state = 'unknown';
-    internal.noble.on = jest.fn((event: string, listener: (state: string) => void) => {
+    internal.noble.on = vi.fn((event: string, listener: (state: string) => void) => {
       if (event === 'stateChange') stateChangeListener = listener;
     });
 
@@ -461,30 +461,30 @@ describe('TestPlatform', () => {
   });
 
   test('should time out while waiting for the Bluetooth adapter to power on', async () => {
-    jest.useFakeTimers();
+    vi.useFakeTimers();
 
     const bthome = new BTHome();
     const internal = asInternal(bthome);
-    const removeListener = jest.fn();
+    const removeListener = vi.fn();
     let stateChangeListener: ((state: string) => void) | undefined;
 
     internal.noble = {
       state: 'unknown',
-      on: jest.fn((event: string, listener: (state: string) => void) => {
+      on: vi.fn((event: string, listener: (state: string) => void) => {
         if (event === 'stateChange') stateChangeListener = listener;
       }),
       removeListener,
-      startScanningAsync: jest.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue(),
-      stopScanningAsync: jest.fn<() => Promise<void>>().mockResolvedValue(),
+      startScanningAsync: vi.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue(),
+      stopScanningAsync: vi.fn<() => Promise<void>>().mockResolvedValue(),
     };
 
     const waitPromise = internal.waitForPoweredOn();
     stateChangeListener?.('resetting');
-    jest.advanceTimersByTime(30000);
+    vi.advanceTimersByTime(30000);
     await expect(waitPromise).rejects.toThrow('Timeout waiting for the Bluetooth adapter to be powered on (state=unknown)');
     expect(removeListener).toHaveBeenCalledWith('stateChange', expect.any(Function));
 
-    jest.useRealTimers();
+    vi.useRealTimers();
   });
 
   test('should warn when start is called while a BLE scan is already running', async () => {
@@ -507,8 +507,8 @@ describe('TestPlatform', () => {
   test('should stop scanning and clear cached peripherals when noble is loaded', async () => {
     const bthome = new BTHome();
     const fakeNoble = {
-      removeListener: jest.fn(),
-      stopScanningAsync: jest.fn<() => Promise<void>>().mockResolvedValue(),
+      removeListener: vi.fn(),
+      stopScanningAsync: vi.fn<() => Promise<void>>().mockResolvedValue(),
     };
 
     bthome.isScanning = true;
@@ -566,8 +566,8 @@ describe('TestPlatform', () => {
     const failingStop = new BTHome();
     failingStop.isScanning = true;
     (failingStop as unknown as { noble: { removeListener: () => void; stopScanningAsync: () => Promise<void> } }).noble = {
-      removeListener: jest.fn(),
-      stopScanningAsync: jest.fn<() => Promise<void>>().mockRejectedValue(new Error('stop failed')),
+      removeListener: vi.fn(),
+      stopScanningAsync: vi.fn<() => Promise<void>>().mockRejectedValue(new Error('stop failed')),
     };
 
     await failingStop.stop();
@@ -579,8 +579,8 @@ describe('TestPlatform', () => {
     const failingStopWithString = new BTHome();
     failingStopWithString.isScanning = true;
     (failingStopWithString as unknown as { noble: { removeListener: () => void; stopScanningAsync: () => Promise<void> } }).noble = {
-      removeListener: jest.fn(),
-      stopScanningAsync: jest.fn<() => Promise<void>>().mockRejectedValue('stop failed as string'),
+      removeListener: vi.fn(),
+      stopScanningAsync: vi.fn<() => Promise<void>>().mockRejectedValue('stop failed as string'),
     };
 
     await failingStopWithString.stop();

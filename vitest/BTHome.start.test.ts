@@ -1,8 +1,8 @@
 const NAME = 'BTHomeStart';
 
-import { jest } from '@jest/globals';
-import { setDebug, setupTest } from 'matterbridge/jestutils';
 import { LogLevel } from 'matterbridge/logger';
+import { setDebug, setupTest } from 'matterbridge/vitest-utils';
+import type { Mock } from 'vitest';
 
 await setupTest(NAME, false);
 
@@ -12,13 +12,13 @@ interface InternalBTHome {
 
 interface NobleDouble {
   state: string;
-  on: jest.Mock;
-  removeListener: jest.Mock;
-  startScanningAsync: jest.Mock<(_services: string[], _allowDuplicates: boolean) => Promise<void>>;
-  stopScanningAsync: jest.Mock<() => Promise<void>>;
+  on: Mock;
+  removeListener: Mock;
+  startScanningAsync: Mock<(_services: string[], _allowDuplicates: boolean) => Promise<void>>;
+  stopScanningAsync: Mock<() => Promise<void>>;
 }
 
-type BTHomeModule = typeof import('./BTHome.js');
+type BTHomeModule = typeof import('../src/BTHome.js');
 
 function asInternal(value: object): InternalBTHome {
   return value as InternalBTHome;
@@ -27,40 +27,23 @@ function asInternal(value: object): InternalBTHome {
 function createFakeNoble(state = 'poweredOn'): NobleDouble {
   return {
     state,
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    startScanningAsync: jest.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue(),
-    stopScanningAsync: jest.fn<() => Promise<void>>().mockResolvedValue(),
+    on: vi.fn(),
+    removeListener: vi.fn(),
+    startScanningAsync: vi.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue(),
+    stopScanningAsync: vi.fn<() => Promise<void>>().mockResolvedValue(),
   };
 }
 
-function overrideNobleProperty<T extends object, K extends keyof T>(target: T, key: K, value: T[K]): void {
-  Object.defineProperty(target, key, {
-    configurable: true,
-    writable: true,
-    value,
-  });
+async function importFreshBTHome(_tag: string): Promise<BTHomeModule> {
+  // Reset the module registry so BTHome.js (and its module-level CLI block) is re-evaluated on the next import.
+  vi.resetModules();
+  return await import('../src/BTHome.js');
 }
 
-async function importFreshBTHome(tag: string): Promise<BTHomeModule> {
-  return import(`./BTHome.js?${tag}-${Date.now()}-${Math.random().toString(16).slice(2)}`);
-}
-
-async function getMutableNoble(): Promise<NobleDouble> {
-  const nobleModule = await import('@stoprocent/noble');
-
-  return nobleModule.default as unknown as NobleDouble;
-}
-
-async function configureNoble(state = 'poweredOn'): Promise<NobleDouble> {
-  const noble = await getMutableNoble();
-
-  overrideNobleProperty(noble, 'state', state);
-  overrideNobleProperty(noble, 'on', jest.fn());
-  overrideNobleProperty(noble, 'removeListener', jest.fn());
-  overrideNobleProperty(noble, 'startScanningAsync', jest.fn<(_services: string[], _allowDuplicates: boolean) => Promise<void>>().mockResolvedValue());
-  overrideNobleProperty(noble, 'stopScanningAsync', jest.fn<() => Promise<void>>().mockResolvedValue());
-
+function configureNoble(state = 'poweredOn'): NobleDouble {
+  // Mock @stoprocent/noble with a stable fake so the dynamic import inside BTHome.start() resolves to it.
+  const noble = createFakeNoble(state);
+  vi.doMock('@stoprocent/noble', () => ({ default: noble }));
   return noble;
 }
 
@@ -73,26 +56,28 @@ describe('BTHomeStart', () => {
   const originalArgv = [...process.argv];
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     process.argv = [...originalArgv];
   });
 
   afterEach(async () => {
     process.argv = [...originalArgv];
-    jest.unstable_unmockModule('@stoprocent/noble');
-    jest.unstable_unmockModule('./BTHomeDecoder.js');
-    jest.unstable_unmockModule('./BTHomeShellyMdDecoder.js');
+    vi.doUnmock('@stoprocent/noble');
+    vi.doUnmock('../src/BTHomeDecoder.js');
+    vi.doUnmock('../src/BTHomeShellyMdDecoder.js');
     await setDebug(false);
   });
 
   afterAll(async () => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   test('should reject when noble cannot be loaded during start', async () => {
-    jest.unstable_mockModule('@stoprocent/noble', () => {
-      throw new Error('load failed');
-    });
+    vi.doMock('@stoprocent/noble', () => ({
+      get default(): never {
+        throw new Error('load failed');
+      },
+    }));
 
     const module = await importFreshBTHome('import-error');
 
@@ -100,51 +85,54 @@ describe('BTHomeStart', () => {
   });
 
   test('should stringify non Error failures during start', async () => {
-    jest.unstable_mockModule('@stoprocent/noble', () => {
-      throw 'load failed as string';
-    });
+    vi.doMock('@stoprocent/noble', () => ({
+      get default(): never {
+        // oxlint-disable-next-line typescript/only-throw-error -- exercising the non-Error (String(err)) rejection branch in BTHome.start()
+        throw 'load failed as string';
+      },
+    }));
 
     const importFailureModule = await importFreshBTHome('import-error-string');
     await expect(new importFailureModule.BTHome().start()).rejects.toBe('load failed as string');
-    jest.unstable_unmockModule('@stoprocent/noble');
+    vi.doUnmock('@stoprocent/noble');
 
-    await configureNoble('unknown');
+    configureNoble('unknown');
     const adapterModule = await importFreshBTHome('adapter-fail-string');
     const adapterBTHome = new adapterModule.BTHome();
-    jest.spyOn(asInternal(adapterBTHome), 'waitForPoweredOn').mockRejectedValueOnce('adapter failed as string');
+    vi.spyOn(asInternal(adapterBTHome), 'waitForPoweredOn').mockRejectedValueOnce('adapter failed as string');
     await expect(adapterBTHome.start()).rejects.toBe('adapter failed as string');
 
-    const noble = await configureNoble();
+    const noble = configureNoble();
     noble.startScanningAsync.mockRejectedValueOnce('scan failed as string');
     const scanModule = await importFreshBTHome('scan-fail-string');
     const scanBTHome = new scanModule.BTHome();
-    jest.spyOn(asInternal(scanBTHome), 'waitForPoweredOn').mockResolvedValueOnce();
+    vi.spyOn(asInternal(scanBTHome), 'waitForPoweredOn').mockResolvedValueOnce();
     await expect(scanBTHome.start()).rejects.toBe('scan failed as string');
   });
 
   test('should reject when waiting for the adapter fails during start', async () => {
-    await configureNoble('unknown');
+    configureNoble('unknown');
 
     const module = await importFreshBTHome('adapter-fail');
     const bthome = new module.BTHome();
-    jest.spyOn(asInternal(bthome), 'waitForPoweredOn').mockRejectedValueOnce(new Error('adapter failed'));
+    vi.spyOn(asInternal(bthome), 'waitForPoweredOn').mockRejectedValueOnce(new Error('adapter failed'));
 
     await expect(bthome.start()).rejects.toThrow('adapter failed');
   });
 
   test('should reject when scan start fails after the adapter is ready', async () => {
-    const noble = await configureNoble();
+    const noble = configureNoble();
     noble.startScanningAsync.mockRejectedValueOnce(new Error('scan failed'));
 
     const module = await importFreshBTHome('scan-fail');
     const bthome = new module.BTHome();
-    jest.spyOn(asInternal(bthome), 'waitForPoweredOn').mockResolvedValueOnce();
+    vi.spyOn(asInternal(bthome), 'waitForPoweredOn').mockResolvedValueOnce();
 
     await expect(bthome.start()).rejects.toThrow('scan failed');
   });
 
   test('should start scanning when noble loads and the adapter is ready', async () => {
-    const noble = await configureNoble();
+    const noble = configureNoble();
 
     const module = await importFreshBTHome('start-success');
     const bthome = new module.BTHome();
@@ -158,20 +146,20 @@ describe('BTHomeStart', () => {
 
   test('should execute the scan CLI path and its registered process handlers', async () => {
     const handlers: Partial<Record<'SIGINT' | 'SIGTERM' | 'uncaughtException' | 'unhandledRejection', (...args: unknown[]) => Promise<void>>> = {};
-    const processOnSpy = jest.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
+    const processOnSpy = vi.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
       if (event === 'SIGINT' || event === 'SIGTERM' || event === 'uncaughtException' || event === 'unhandledRejection') {
         handlers[event] = handler;
       }
       return process;
     }) as typeof process.on);
-    const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
-    await configureNoble();
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    configureNoble();
 
     process.argv = ['node', 'BTHome.js', '--scan', '--ble', '--bthome', '--shellyble', '--address', 'aa:bb:cc:dd:ee:ff', '11:22:33:44:55:66', '--logger', LogLevel.INFO];
 
     const module = await importFreshBTHome('cli-success');
-    const logDevicesSpy = jest.spyOn(module.BTHome.prototype, 'logDevices').mockImplementation(() => undefined);
-    const stopSpy = jest.spyOn(module.BTHome.prototype, 'stop').mockResolvedValue();
+    const logDevicesSpy = vi.spyOn(module.BTHome.prototype, 'logDevices').mockImplementation(() => {});
+    const stopSpy = vi.spyOn(module.BTHome.prototype, 'stop').mockResolvedValue();
 
     await flushMicrotasks();
     await handlers.SIGINT?.();
@@ -186,13 +174,13 @@ describe('BTHomeStart', () => {
   });
 
   test('should log and exit when the scan CLI path cannot start discovery', async () => {
-    const processOnSpy = jest.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
+    const processOnSpy = vi.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
       void event;
       void handler;
       return process;
     }) as typeof process.on);
-    const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
-    const noble = await configureNoble();
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const noble = configureNoble();
 
     noble.startScanningAsync.mockRejectedValueOnce(new Error('cli scan failed'));
     process.argv = ['node', 'BTHome.js', '--scan'];
@@ -206,17 +194,17 @@ describe('BTHomeStart', () => {
 
   test('should execute the scan CLI path when short options are used', async () => {
     const handlers: Partial<Record<'SIGINT', (...args: unknown[]) => Promise<void>>> = {};
-    const processOnSpy = jest.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
+    const processOnSpy = vi.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
       if (event === 'SIGINT') handlers.SIGINT = handler;
       return process;
     }) as typeof process.on);
-    const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
 
-    await configureNoble();
+    configureNoble();
     process.argv = ['node', 'BTHome.js', '--scan', '-address', 'aa:bb:cc:dd:ee:ff', '-logger', LogLevel.INFO];
 
     const module = await importFreshBTHome('cli-short-options');
-    const stopSpy = jest.spyOn(module.BTHome.prototype, 'stop').mockResolvedValue();
+    const stopSpy = vi.spyOn(module.BTHome.prototype, 'stop').mockResolvedValue();
 
     await flushMicrotasks();
     await handlers.SIGINT?.();
@@ -228,17 +216,17 @@ describe('BTHomeStart', () => {
 
   test('should execute the scan CLI path when the address option appears before scan', async () => {
     const handlers: Partial<Record<'SIGINT', (...args: unknown[]) => Promise<void>>> = {};
-    const processOnSpy = jest.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
+    const processOnSpy = vi.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => Promise<void>) => {
       if (event === 'SIGINT') handlers.SIGINT = handler;
       return process;
     }) as typeof process.on);
-    const processExitSpy = jest.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
 
-    await configureNoble();
+    configureNoble();
     process.argv = ['node', 'BTHome.js', '--address', 'aa:bb:cc:dd:ee:ff', '--scan'];
 
     const module = await importFreshBTHome('cli-address-first');
-    const stopSpy = jest.spyOn(module.BTHome.prototype, 'stop').mockResolvedValue();
+    const stopSpy = vi.spyOn(module.BTHome.prototype, 'stop').mockResolvedValue();
 
     await flushMicrotasks();
     await handlers.SIGINT?.();
@@ -249,8 +237,8 @@ describe('BTHomeStart', () => {
   });
 
   test('should preserve existing device fields when a mocked decoder returns undefined values', async () => {
-    jest.unstable_mockModule('./BTHomeDecoder.js', () => ({
-      decodeBTHome: jest.fn(() => ({ version: undefined, encrypted: undefined, trigger: undefined, readings: {} })),
+    vi.doMock('../src/BTHomeDecoder.js', () => ({
+      decodeBTHome: vi.fn(() => ({ version: undefined, encrypted: undefined, trigger: undefined, readings: {} })),
     }));
 
     const module = await importFreshBTHome('decoder-nullish-branches');
@@ -300,12 +288,12 @@ describe('BTHomeStart', () => {
   });
 
   test('should keep handling Shelly manufacturer data when the mocked decoder returns null or missing model names', async () => {
-    const decodeShellyManufacturerData = jest
+    const decodeShellyManufacturerData = vi
       .fn()
       .mockReturnValueOnce(null)
       .mockReturnValueOnce({ companyId: 0x0ba9, modelId: 1, modelIdShortName: undefined, modelIdLongName: undefined, mac: 'aa:bb:cc:dd:ee:ff' });
 
-    jest.unstable_mockModule('./BTHomeShellyMdDecoder.js', () => ({
+    vi.doMock('../src/BTHomeShellyMdDecoder.js', () => ({
       decodeShellyManufacturerData,
     }));
 

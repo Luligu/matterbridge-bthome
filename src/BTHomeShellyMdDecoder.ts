@@ -22,6 +22,8 @@
  * limitations under the License. *
  */
 
+// oxlint-disable no-bitwise
+
 /** Mapping of Shelly BLU device IDs to their long names */
 const SHELLY_MODEL_LONG_NAMES: Readonly<Record<number, string>> = {
   0x0001: 'Shelly BLU Button1',

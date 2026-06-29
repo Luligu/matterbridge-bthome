@@ -190,6 +190,7 @@ export const BTHOME_SPEC: Readonly<Record<number, BTHomeSpecEntry>> = {
       const evt = buf.readUInt8(off);
       const steps = buf.readUInt8(off + 1);
       const map = { 0x00: 'none', 0x01: 'rotateLeft', 0x02: 'rotateRight' };
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       return { event: map[evt as keyof typeof map] || `evt0x${evt.toString(16)}`, steps };
     },
   },
