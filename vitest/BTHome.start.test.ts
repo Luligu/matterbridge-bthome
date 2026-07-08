@@ -25,9 +25,14 @@ interface NobleDouble {
 }
 
 type BTHomeModule = typeof import('../src/BTHome.js');
+type ProcessExitCode = Parameters<typeof process.exit>[0];
 
 function asInternal(value: object): InternalBTHome {
   return value as InternalBTHome;
+}
+
+function mockProcessExit(code?: ProcessExitCode): never {
+  return code as never;
 }
 
 function createFakeNoble(state = 'poweredOn'): NobleDouble {
@@ -158,7 +163,7 @@ describe('BTHomeStart', () => {
       }
       return process;
     }) as typeof process.on);
-    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(mockProcessExit);
     configureNoble();
 
     process.argv = ['node', 'BTHome.js', '--scan', '--ble', '--bthome', '--shellyble', '--address', 'aa:bb:cc:dd:ee:ff', '11:22:33:44:55:66', '--logger', LogLevel.INFO];
@@ -185,7 +190,7 @@ describe('BTHomeStart', () => {
       void handler;
       return process;
     }) as typeof process.on);
-    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(mockProcessExit);
     const noble = configureNoble();
 
     noble.startScanningAsync.mockRejectedValueOnce(new Error('cli scan failed'));
@@ -204,7 +209,7 @@ describe('BTHomeStart', () => {
       if (event === 'SIGINT') handlers.SIGINT = handler;
       return process;
     }) as typeof process.on);
-    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(mockProcessExit);
 
     configureNoble();
     process.argv = ['node', 'BTHome.js', '--scan', '-address', 'aa:bb:cc:dd:ee:ff', '-logger', LogLevel.INFO];
@@ -226,7 +231,7 @@ describe('BTHomeStart', () => {
       if (event === 'SIGINT') handlers.SIGINT = handler;
       return process;
     }) as typeof process.on);
-    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(((code?: number) => code as never) as typeof process.exit);
+    const processExitSpy = vi.spyOn(process, 'exit').mockImplementation(mockProcessExit);
 
     configureNoble();
     process.argv = ['node', 'BTHome.js', '--address', 'aa:bb:cc:dd:ee:ff', '--scan'];
