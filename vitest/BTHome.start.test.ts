@@ -1,3 +1,9 @@
+/**
+ * @file vitest/BTHome.start.test.ts
+ * @description This file contains the tests for the BTHome class start behavior.
+ * @author Luca Liguori
+ */
+
 const NAME = 'BTHomeStart';
 
 import { LogLevel } from 'matterbridge/logger';

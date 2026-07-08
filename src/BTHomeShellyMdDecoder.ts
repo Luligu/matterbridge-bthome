@@ -1,7 +1,6 @@
 /**
- * This file contains the BTHome manufacturer data decoder for Shelly devices.
- *
- * @file src\BTHomeShellyMdDecoder.ts
+ * @file src/BTHomeShellyMdDecoder.ts
+ * @description This file contains the BTHome manufacturer data decoder for Shelly devices.
  * @author Luca Liguori
  * @created 2025-04-22
  * @version 1.0.0
@@ -19,10 +18,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-// oxlint-disable no-bitwise
+/* oxlint-disable no-bitwise */
 
 /** Mapping of Shelly BLU device IDs to their long names */
 const SHELLY_MODEL_LONG_NAMES: Readonly<Record<number, string>> = {

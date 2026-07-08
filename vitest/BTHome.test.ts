@@ -1,3 +1,9 @@
+/**
+ * @file vitest/BTHome.test.ts
+ * @description This file contains the tests for the BTHome class.
+ * @author Luca Liguori
+ */
+
 const NAME = 'BTHome';
 
 import type { PeripheralAdvertisement } from '@stoprocent/noble';

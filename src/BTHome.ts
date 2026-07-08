@@ -1,7 +1,6 @@
 /**
- * This file contains the class BTHome.
- *
- * @file src\BTHome.ts
+ * @file src/BTHome.ts
+ * @description This file contains the class BTHome.
  * @author Luca Liguori
  * @created 2025-04-22
  * @version 1.0.0
@@ -19,10 +18,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-/* eslint-disable n/no-process-exit */
+/* oxlint-disable n/no-process-exit */
 
 import { EventEmitter } from 'node:events';
 

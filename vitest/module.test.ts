@@ -1,3 +1,9 @@
+/**
+ * @file vitest/module.test.ts
+ * @description This file contains the tests for the Platform of the BTHome plugin.
+ * @author Luca Liguori
+ */
+
 const NAME = 'Platform';
 const MATTER_PORT = 6000;
 

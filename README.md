@@ -5,6 +5,7 @@
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge/latest?label=docker%20version)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge?label=docker%20pulls)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-bthome/actions/workflows/build.yml/badge.svg)
+![CodeQL](https://github.com/Luligu/matterbridge-bthome/actions/workflows/codeql.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Luligu/matterbridge-bthome/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-bthome)
 [![tested with Vitest](https://img.shields.io/badge/tested_with-Vitest-6E9F18.svg?logo=vitest&logoColor=white)](https://vitest.dev)
 [![styled with Oxc](https://img.shields.io/badge/styled_with-Oxc-9BE4E0.svg?logo=oxc&logoColor=white)](https://oxc.rs/docs/guide/usage/formatter.html)
@@ -259,13 +260,14 @@ bthome --scan --bthome
 
 ```markdown
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Parameter | Description |
+
+| Parameter     | Description                                                                                                            |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `--scan` | Activate the scanner |
-| `--bthome` | Enable the filter for BTHome devices |
-| `--shellyble` | Enable the filter for Shelly devices with BLE component enabled |
-| `--address` | Enable the filter for MAC address (e.g., `bthome --scan --address 28:68:47:fc:9a:6b 28:db:a7:b5:d1:ca --logger debug`) |
-| `--logger` | Set the logging level (e.g., `debug`, `info`, `notice`, ...) |
+| `--scan`      | Activate the scanner                                                                                                   |
+| `--bthome`    | Enable the filter for BTHome devices                                                                                   |
+| `--shellyble` | Enable the filter for Shelly devices with BLE component enabled                                                        |
+| `--address`   | Enable the filter for MAC address (e.g., `bthome --scan --address 28:68:47:fc:9a:6b 28:db:a7:b5:d1:ca --logger debug`) |
+| `--logger`    | Set the logging level (e.g., `debug`, `info`, `notice`, ...)                                                           |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
 ```
 
