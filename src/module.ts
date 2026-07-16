@@ -38,7 +38,7 @@ import {
   temperatureSensor,
 } from 'matterbridge';
 import { type AnsiLogger, BLUE, db, debugStringify, idn, type LogLevel, nf, rs } from 'matterbridge/logger';
-import { NumberTag } from 'matterbridge/matter';
+import { CommonNumberTag } from 'matterbridge/matter';
 import { fireAndForget } from 'matterbridge/utils';
 
 import { BTHome, type BTHomeDevice } from './BTHome.js';
@@ -230,7 +230,7 @@ export class Platform extends MatterbridgeDynamicPlatform {
         const child = matterbridgeDevice.addChildDeviceType(
           property,
           converter.deviceType,
-          index ? { id: property, tagList: [{ mfgCode: null, namespaceId: NumberTag.Zero.namespaceId, tag: Number.parseInt(index), label: null }] } : { id: property },
+          index ? { id: property, tagList: [{ mfgCode: null, namespaceId: CommonNumberTag.Zero.namespaceId, tag: Number.parseInt(index), label: null }] } : { id: property },
         );
         if (converter.cluster === 'PowerSource') child.createDefaultPowerSourceReplaceableBatteryClusterServer();
         child.addRequiredClusterServers();
