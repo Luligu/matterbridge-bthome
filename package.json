@@ -114,23 +114,23 @@
     "format": "oxfmt",
     "format:check": "oxfmt --check",
     "reset": "npm run deepClean && npm run softReset",
-    "softReset": "npm install --no-fund --no-audit && npm prune && npm link --no-fund --no-audit matterbridge && npm run build && npm run typecheck",
+    "softReset": "npm install --no-fund --no-audit && npm prune --no-fund --no-audit && npm link --no-fund --no-audit matterbridge && npm run build && npm run typecheck",
     "checkDependencies": "npm install --no-fund --no-audit --no-save npm-check-updates && ncu && npm run softReset",
     "updateDependencies": "npm install --no-fund --no-audit --no-save npm-check-updates && ncu -u && npm run softReset",
     "runMeBeforePublish": "npm run cleanBuild && npm run format && npm run lint && npm run build && npm run typecheck && npm run test:coverage",
     "prepublishOnly": "npm run cleanBuildProduction && npm pkg delete devDependencies scripts automator && node scripts/prepublish-clean.mjs && npm install --no-fund --no-audit --omit=dev && npm shrinkwrap --omit=dev"
   },
   "dependencies": {
-    "@stoprocent/noble": "2.5.5",
+    "@stoprocent/noble": "2.5.7",
     "node-ansi-logger": "3.3.0",
     "node-persist-manager": "2.1.0"
   },
   "devDependencies": {
     "@types/node": "26.1.1",
     "@vitest/coverage-v8": "4.1.10",
-    "oxfmt": "0.58.0",
-    "oxlint": "1.73.0",
-    "oxlint-tsgolint": "0.24.0",
+    "oxfmt": "0.59.0",
+    "oxlint": "1.74.0",
+    "oxlint-tsgolint": "0.25.0",
     "typescript": "7.0.2",
     "vitest": "4.1.10"
   }
