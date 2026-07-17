@@ -5,10 +5,13 @@
 [![Docker Version](https://img.shields.io/docker/v/luligu/matterbridge/latest?label=docker%20version)](https://hub.docker.com/r/luligu/matterbridge)
 [![Docker Pulls](https://img.shields.io/docker/pulls/luligu/matterbridge?label=docker%20pulls)](https://hub.docker.com/r/luligu/matterbridge)
 ![Node.js CI](https://github.com/Luligu/matterbridge-bthome/actions/workflows/build.yml/badge.svg)
+![CodeQL](https://github.com/Luligu/matterbridge-bthome/actions/workflows/codeql.yml/badge.svg)
 [![codecov](https://codecov.io/gh/Luligu/matterbridge-bthome/branch/main/graph/badge.svg)](https://codecov.io/gh/Luligu/matterbridge-bthome)
-[![styled with prettier](https://img.shields.io/badge/styled_with-Prettier-f8bc45.svg?logo=prettier)](https://prettier.io/)
-[![linted with eslint](https://img.shields.io/badge/linted_with-ES_Lint-4B32C3.svg?logo=eslint)](https://eslint.org/)
+[![tested with Vitest](https://img.shields.io/badge/tested_with-Vitest-6E9F18.svg?logo=vitest&logoColor=white)](https://vitest.dev)
+[![styled with Oxc](https://img.shields.io/badge/styled_with-Oxc-9BE4E0.svg?logo=oxc&logoColor=white)](https://oxc.rs/docs/guide/usage/formatter.html)
+[![linted with Oxc](https://img.shields.io/badge/linted_with-Oxc-9BE4E0.svg?logo=oxc&logoColor=white)](https://oxc.rs/docs/guide/usage/linter.html)
 [![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![TypeScript Native](https://img.shields.io/badge/TypeScript_Native-3178C6?logo=typescript&logoColor=white)](https://github.com/microsoft/typescript-go)
 [![ESM](https://img.shields.io/badge/ESM-Node.js-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![matterbridge.io](https://img.shields.io/badge/matterbridge.io-online-brightgreen)](https://matterbridge.io)
 
@@ -257,6 +260,7 @@ bthome --scan --bthome
 
 ```markdown
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+
 | Parameter     | Description                                                                                                            |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------- |
 | `--scan`      | Activate the scanner                                                                                                   |
@@ -320,7 +324,7 @@ services:
       - NET_ADMIN
       - CAP_NET_BIND_SERVICE
     volumes:
-      - "/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket"
+      - '/var/run/dbus/system_bus_socket:/var/run/dbus/system_bus_socket'
       - '${HOME}/Matterbridge:/root/Matterbridge'
       - '${HOME}/.matterbridge:/root/.matterbridge'
       - '${HOME}/.mattercert:/root/.mattercert'

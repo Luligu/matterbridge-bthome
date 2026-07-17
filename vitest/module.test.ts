@@ -1,30 +1,35 @@
+/**
+ * @file vitest/module.test.ts
+ * @description This file contains the tests for the Platform of the BTHome plugin.
+ * @author Luca Liguori
+ */
+
 const NAME = 'Platform';
 const MATTER_PORT = 6000;
 
 // Warning: the tests in this file are supposed to run sequentially.
 
-import { jest } from '@jest/globals';
-import {
-  addMatterbridgePlatform,
-  createMatterbridgeEnvironment,
-  destroyMatterbridgeEnvironment,
-  log,
-  loggerLogSpy,
-  matterbridge,
-  setDebug,
-  setupTest,
-  startMatterbridgeEnvironment,
-  stopMatterbridgeEnvironment,
-} from 'matterbridge/jestutils';
+import type { PlatformMatterbridge } from 'matterbridge';
 import { idn, LogLevel, nf, rs } from 'matterbridge/logger';
+import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import {
+  addMatterbridge,
+  createServerNode,
+  createTestEnvironment,
+  destroyTestEnvironment,
+  getMatterbridge,
+  startServerNode,
+  stopServerNode,
+} from 'matterbridge/vitest-utils/matter';
 
-import { BTHome, type BTHomeDevice } from './BTHome.js';
-import initializePlugin, { BTHomePlatformConfig, Platform } from './module.js';
+import { BTHome, type BTHomeDevice } from '../src/BTHome.js';
+import initializePlugin, { type BTHomePlatformConfig, Platform } from '../src/module.js';
 
 // Setup the test environment
 await setupTest(NAME, false);
 
 describe('TestPlatform', () => {
+  let matterbridge: PlatformMatterbridge;
   let platform: Platform;
 
   const device: BTHomeDevice = {
@@ -39,7 +44,7 @@ describe('TestPlatform', () => {
     lastSeen: new Date('2026-04-25T00:00:00.000Z'),
   };
 
-  jest.spyOn(BTHome.prototype, 'start').mockImplementation(async () => {
+  vi.spyOn(BTHome.prototype, 'start').mockImplementation(async () => {
     // Mock implementation of BTHome.start
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -60,13 +65,15 @@ describe('TestPlatform', () => {
 
   beforeAll(async () => {
     // Create Matterbridge environment
-    await createMatterbridgeEnvironment();
-    await startMatterbridgeEnvironment(MATTER_PORT);
+    await createTestEnvironment();
+    await createServerNode(MATTER_PORT);
+    await startServerNode();
+    matterbridge = getMatterbridge();
   });
 
   beforeEach(() => {
     // Reset the mock calls before each test
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   afterEach(async () => {
@@ -76,11 +83,11 @@ describe('TestPlatform', () => {
 
   afterAll(async () => {
     // Destroy Matterbridge environment
-    await stopMatterbridgeEnvironment();
-    await destroyMatterbridgeEnvironment();
+    await stopServerNode();
+    await destroyTestEnvironment();
 
     // Restore all mocks
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   });
 
   it('should return an instance of Platform', async () => {
@@ -94,14 +101,14 @@ describe('TestPlatform', () => {
   });
 
   it('should throw error in load when version is not valid', () => {
-    expect(() => new Platform({ ...matterbridge, matterbridgeVersion: '1.0.0' }, log, config)).toThrow(
-      'This plugin requires Matterbridge version >= "3.8.0". Please update Matterbridge to the latest version in the frontend.',
+    expect(() => new Platform({ ...matterbridge, matterbridgeVersion: '3.8.0' }, log, config)).toThrow(
+      'This plugin requires Matterbridge version >= "3.9.0". Please update Matterbridge to the latest version in the frontend.',
     );
   });
 
   it('should initialize platform with config name', () => {
     platform = new Platform(matterbridge, log, config);
-    addMatterbridgePlatform(platform);
+    addMatterbridge(platform);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Initializing platform:', config.name);
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, 'Finished initializing platform:', config.name);
   });
@@ -113,7 +120,7 @@ describe('TestPlatform', () => {
 
   it('should call onConfigure', async () => {
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
-    const updateDeviceSpy = jest.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => undefined);
+    const updateDeviceSpy = vi.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => {});
 
     platform.btHome.bthomePeripherals.clear();
     platform.btHome.bthomePeripherals.set(device.mac, { ...device });
@@ -127,8 +134,15 @@ describe('TestPlatform', () => {
   });
 
   it('should call onChangeLoggerLevel', async () => {
+    const bridgedDevice = { log: { logLevel: LogLevel.INFO } };
+    platform.bridgedDevices.set(device.mac, bridgedDevice as never);
+
     await platform.onChangeLoggerLevel(LogLevel.DEBUG);
+
     expect(loggerLogSpy).toHaveBeenCalledWith(LogLevel.INFO, `Changing logger level for platform ${idn}${config.name}${rs}${nf} to ${LogLevel.DEBUG}`);
+    expect(bridgedDevice.log.logLevel).toBe(LogLevel.DEBUG);
+
+    platform.bridgedDevices.clear();
   });
 
   it('should call onAction', async () => {
@@ -137,9 +151,9 @@ describe('TestPlatform', () => {
   });
 
   it('should log error when onAction deletes an unknown device', async () => {
-    const stopSpy = jest.spyOn(platform.btHome, 'stop').mockResolvedValue(undefined);
+    const stopSpy = vi.spyOn(platform.btHome, 'stop').mockResolvedValue();
     const platformWithSavePeripherals = platform as unknown as { savePeripherals: () => Promise<void> };
-    const savePeripheralsSpy = jest.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => undefined);
+    const savePeripheralsSpy = vi.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => {});
 
     await platform.onAction('delete', ' 11:22:33:44:55:66 ');
 
@@ -154,10 +168,10 @@ describe('TestPlatform', () => {
   it('should delete a registered device when onAction receives delete', async () => {
     const mac = device.mac;
     const bridgedDevice = {};
-    const stopSpy = jest.spyOn(platform.btHome, 'stop').mockResolvedValue(undefined);
-    const unregisterDeviceSpy = jest.spyOn(platform, 'unregisterDevice').mockImplementation(async () => undefined);
+    const stopSpy = vi.spyOn(platform.btHome, 'stop').mockResolvedValue();
+    const unregisterDeviceSpy = vi.spyOn(platform, 'unregisterDevice').mockImplementation(async () => {});
     const platformWithSavePeripherals = platform as unknown as { savePeripherals: () => Promise<void> };
-    const savePeripheralsSpy = jest.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => undefined);
+    const savePeripheralsSpy = vi.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => {});
 
     platform.btHome.bthomePeripherals.set(mac, { ...device });
     platform.bridgedDevices.set(mac, bridgedDevice as never);
@@ -178,10 +192,10 @@ describe('TestPlatform', () => {
 
   it('should reset storage when onAction receives reset', async () => {
     const mac = device.mac;
-    const stopSpy = jest.spyOn(platform.btHome, 'stop').mockResolvedValue(undefined);
-    const unregisterAllDevicesSpy = jest.spyOn(platform, 'unregisterAllDevices').mockImplementation(async () => undefined);
+    const stopSpy = vi.spyOn(platform.btHome, 'stop').mockResolvedValue();
+    const unregisterAllDevicesSpy = vi.spyOn(platform, 'unregisterAllDevices').mockImplementation(async () => {});
     const platformWithSavePeripherals = platform as unknown as { savePeripherals: () => Promise<void> };
-    const savePeripheralsSpy = jest.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => undefined);
+    const savePeripheralsSpy = vi.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => {});
 
     platform.btHome.bthomePeripherals.set(mac, { ...device });
     platform.bridgedDevices.set(mac, {} as never);
@@ -203,8 +217,8 @@ describe('TestPlatform', () => {
   it('should add and save peripherals when btHome emits discovered', async () => {
     const platformWithAddDevice = platform as unknown as { addDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithSavePeripherals = platform as unknown as { savePeripherals: () => Promise<void> };
-    const addDeviceSpy = jest.spyOn(platformWithAddDevice, 'addDevice').mockImplementation(async () => undefined);
-    const savePeripheralsSpy = jest.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => undefined);
+    const addDeviceSpy = vi.spyOn(platformWithAddDevice, 'addDevice').mockImplementation(async () => {});
+    const savePeripheralsSpy = vi.spyOn(platformWithSavePeripherals, 'savePeripherals').mockImplementation(async () => {});
 
     platform.btHome.emit('discovered', device);
     await Promise.resolve();
@@ -224,7 +238,7 @@ describe('TestPlatform', () => {
 
   it('should update device when btHome emits update', () => {
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
-    const updateDeviceSpy = jest.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => undefined);
+    const updateDeviceSpy = vi.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => {});
 
     platform.btHome.emit('update', device);
 
@@ -241,8 +255,8 @@ describe('TestPlatform', () => {
         get: <T>(key: string, defaultValue: T) => Promise<T>;
       };
     };
-    const addDeviceSpy = jest.spyOn(platformWithAddDevice, 'addDevice').mockImplementation(async () => undefined);
-    const contextGetSpy = jest.spyOn(platformWithContext.context, 'get').mockResolvedValue([device]);
+    const addDeviceSpy = vi.spyOn(platformWithAddDevice, 'addDevice').mockImplementation(async () => {});
+    const contextGetSpy = vi.spyOn(platformWithContext.context, 'get').mockResolvedValue([device]);
 
     platform.btHome.bthomePeripherals.clear();
     await platformWithLoadPeripherals.loadPeripherals();
@@ -264,7 +278,7 @@ describe('TestPlatform', () => {
         set: (key: string, value: unknown) => Promise<void>;
       };
     };
-    const contextSetSpy = jest.spyOn(platformWithContext.context, 'set').mockResolvedValue(undefined);
+    const contextSetSpy = vi.spyOn(platformWithContext.context, 'set').mockResolvedValue();
 
     platform.btHome.bthomePeripherals.clear();
     platform.btHome.bthomePeripherals.set(device.mac, { ...device });
@@ -281,9 +295,9 @@ describe('TestPlatform', () => {
     const platformWithAddDevice = platform as unknown as { addDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithValidateDevice = platform as unknown as { validateDevice: (id: string, add: boolean) => boolean };
-    const validateDeviceSpy = jest.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
-    const registerDeviceSpy = jest.spyOn(platform, 'registerDevice').mockImplementation(async () => undefined);
-    const updateDeviceSpy = jest.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => undefined);
+    const validateDeviceSpy = vi.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
+    const registerDeviceSpy = vi.spyOn(platform, 'registerDevice').mockImplementation(async () => {});
+    const updateDeviceSpy = vi.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => {});
 
     platform.bridgedDevices.clear();
     await platformWithAddDevice.addDevice(device);
@@ -307,9 +321,9 @@ describe('TestPlatform', () => {
     const platformWithAddDevice = platform as unknown as { addDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithValidateDevice = platform as unknown as { validateDevice: (id: string, add: boolean) => boolean };
-    const validateDeviceSpy = jest.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
-    const registerDeviceSpy = jest.spyOn(platform, 'registerDevice').mockImplementation(async () => undefined);
-    const updateDeviceSpy = jest.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => undefined);
+    const validateDeviceSpy = vi.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
+    const registerDeviceSpy = vi.spyOn(platform, 'registerDevice').mockImplementation(async () => {});
+    const updateDeviceSpy = vi.spyOn(platformWithUpdateDevice, 'updateDevice').mockImplementation(async () => {});
 
     platform.bridgedDevices.clear();
     await platformWithAddDevice.addDevice(deviceToAdd);
@@ -333,21 +347,17 @@ describe('TestPlatform', () => {
     };
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithValidateDevice = platform as unknown as { validateDevice: (id: string, add: boolean) => boolean };
-    const validateDeviceSpy = jest.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
+    const validateDeviceSpy = vi.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
     const temperatureChild = {
       log: {},
-      updateAttribute: jest.fn(async () => undefined),
+      updateAttribute: vi.fn(async () => {}),
     };
     const buttonChild = {
       log: {},
-      triggerSwitchEvent: jest.fn(async () => undefined),
+      triggerSwitchEvent: vi.fn(async () => {}),
     };
     const matterbridgeDevice = {
-      getChildEndpointById: jest.fn((name: string) => {
-        if (name === 'temperature') return temperatureChild;
-        if (name === 'button') return buttonChild;
-        return undefined;
-      }),
+      getChildEndpointById: vi.fn((name: string) => (name === 'temperature' ? temperatureChild : name === 'button' ? buttonChild : undefined)),
     };
 
     platform.bridgedDevices.set(deviceToUpdate.mac, matterbridgeDevice as never);
@@ -371,21 +381,17 @@ describe('TestPlatform', () => {
     };
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithValidateDevice = platform as unknown as { validateDevice: (id: string, add: boolean) => boolean };
-    const validateDeviceSpy = jest.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
+    const validateDeviceSpy = vi.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
     const occupancyChild = {
       log: {},
-      updateAttribute: jest.fn(async () => undefined),
+      updateAttribute: vi.fn(async () => {}),
     };
     const buttonChild = {
       log: {},
-      triggerSwitchEvent: jest.fn(async () => undefined),
+      triggerSwitchEvent: vi.fn(async () => {}),
     };
     const matterbridgeDevice = {
-      getChildEndpointById: jest.fn((id: string) => {
-        if (id === 'occupancyState') return occupancyChild;
-        if (id === 'button') return buttonChild;
-        return undefined;
-      }),
+      getChildEndpointById: vi.fn((id: string) => (id === 'occupancyState' ? occupancyChild : id === 'button' ? buttonChild : undefined)),
     };
 
     platform.bridgedDevices.set(deviceToUpdate.mac, matterbridgeDevice as never);
@@ -412,21 +418,17 @@ describe('TestPlatform', () => {
     };
     const platformWithUpdateDevice = platform as unknown as { updateDevice: (device: BTHomeDevice) => Promise<void> };
     const platformWithValidateDevice = platform as unknown as { validateDevice: (id: string, add: boolean) => boolean };
-    const validateDeviceSpy = jest.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
+    const validateDeviceSpy = vi.spyOn(platformWithValidateDevice, 'validateDevice').mockReturnValue(true);
     const occupancyChild = {
       log: {},
-      updateAttribute: jest.fn(async () => undefined),
+      updateAttribute: vi.fn(async () => {}),
     };
     const buttonChild = {
       log: {},
-      triggerSwitchEvent: jest.fn(async () => undefined),
+      triggerSwitchEvent: vi.fn(async () => {}),
     };
     const matterbridgeDevice = {
-      getChildEndpointById: jest.fn((id: string) => {
-        if (id === 'occupancyState') return occupancyChild;
-        if (id === 'button') return buttonChild;
-        return undefined;
-      }),
+      getChildEndpointById: vi.fn((id: string) => (id === 'occupancyState' ? occupancyChild : id === 'button' ? buttonChild : undefined)),
     };
 
     platform.bridgedDevices.set(deviceToUpdate.mac, matterbridgeDevice as never);

@@ -1,7 +1,6 @@
 /**
- * This file contains the class BTHome.
- *
- * @file src\BTHome.ts
+ * @file src/BTHome.ts
+ * @description This file contains the class BTHome.
  * @author Luca Liguori
  * @created 2025-04-22
  * @version 1.0.0
@@ -19,16 +18,16 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
-/* eslint-disable n/no-process-exit */
+/* oxlint-disable n/no-process-exit */
 
 import { EventEmitter } from 'node:events';
 
 import type { Noble, Peripheral, PeripheralAddressType, PeripheralAdvertisement, PeripheralState, Service } from '@stoprocent/noble';
 import { AnsiLogger, BLUE, GREEN, LogLevel, MAGENTA, nf, TimestampFormat, YELLOW } from 'matterbridge/logger';
-import { hasParameter, isValidNumber, isValidString } from 'matterbridge/utils';
+import { getParameter, hasParameter, isValidNumber, isValidString } from 'matterbridge/utils';
 import { CYAN } from 'node-ansi-logger';
 
 import { decodeBTHome } from './BTHomeDecoder.js';
@@ -172,9 +171,6 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
     this.log.debug(`  - filterBTHome: ${filterBTHome}`);
     this.log.debug(`  - filterShellyBle: ${filterShellyBle}`);
     this.log.debug(`  - filterAddress: ${filterAddress.join(', ')}`);
-
-    // Bind the handleDiscovery method to the correct context
-    this.handleDiscovery = this.handleDiscovery.bind(this);
   }
 
   /**
@@ -197,7 +193,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
    */
   private isBTHomePeripheral(peripheral: Peripheral): boolean {
     if (Array.from(this.bthomePeripherals.values()).find((device) => device.mac === peripheral.address)) return true;
-    if (peripheral.advertisement.serviceData && peripheral.advertisement.serviceData.length) {
+    if (peripheral.advertisement.serviceData?.length) {
       return peripheral.advertisement.serviceData.find((entry) => entry.uuid === 'fcd2') !== undefined;
     }
     return false;
@@ -208,7 +204,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
    *
    * @param {Peripheral} peripheral - The discovered peripheral.
    */
-  private handleDiscovery(peripheral: Peripheral): void {
+  private handleDiscovery = (peripheral: Peripheral): void => {
     if (this.filterBle) {
       let assignedNumber: string | undefined = undefined;
       let manufacturerData: string | undefined = undefined;
@@ -217,6 +213,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
         manufacturerData = '0x' + peripheral.advertisement.manufacturerData.toString('hex');
       }
       let bleDevice = this.blePeripherals.get(peripheral.id);
+      // oxlint-disable-next-line unicorn/no-negated-condition
       if (!bleDevice) {
         bleDevice = {
           id: peripheral.id,
@@ -282,7 +279,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
 
     // Service Data
     const serviceData = peripheral.advertisement.serviceData;
-    if (serviceData && serviceData.length) {
+    if (serviceData?.length) {
       this.log.debug('    - Service Data:');
       serviceData.forEach((entry) => {
         if (entry.uuid === 'fcd2') {
@@ -290,6 +287,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
           this.log.debug(`        BTHome Service Data (${entry.data.toString('hex')}): ${JSON.stringify(bthome)}`);
           let device: BTHomeDevice;
           if (this.bthomePeripherals.has(peripheral.address)) {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion typescript/non-nullable-type-assertion-style
             device = this.bthomePeripherals.get(peripheral.address) as BTHomeDevice;
             device.rssi = peripheral.rssi ?? device.rssi;
             device.localName = peripheral.advertisement.localName ?? device.localName;
@@ -333,6 +331,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
           this.log.debug(`        - Model ID: ${data.modelId} short name ${data.modelIdShortName ?? ''} long name ${data.modelIdLongName ?? ''}`);
           this.log.debug(`        - MAC: ${data.mac}`);
           if (this.bthomePeripherals.has(peripheral.address)) {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion typescript/non-nullable-type-assertion-style
             const device = this.bthomePeripherals.get(peripheral.address) as BTHomeDevice;
             device.modelId = data.modelId;
             device.modelIdShortName = data.modelIdShortName;
@@ -351,7 +350,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
     if (peripheral.advertisement.txPowerLevel) {
       this.log.debug(`    - TX Power Level: ${peripheral.advertisement.txPowerLevel}`);
     }
-  }
+  };
 
   /**
    * Waits for the Bluetooth adapter to be powered on.
@@ -367,7 +366,9 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
     this.log.info('Waiting 30 seconds for the Bluetooth adapter state to be poweredOn…');
 
     return new Promise((resolve, reject) => {
-      const onStateChange = (state: string) => {
+      let timeout: NodeJS.Timeout;
+
+      const onStateChange = (state: string): void => {
         this.log.info(`Bluetooth adapter changed state to ${state}`);
         if (state === 'poweredOn') {
           clearTimeout(timeout);
@@ -380,7 +381,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
         }
       };
 
-      const timeout = setTimeout(() => {
+      timeout = setTimeout(() => {
         this.noble?.removeListener('stateChange', onStateChange);
         reject(new Error(`Timeout waiting for the Bluetooth adapter to be powered on (state=${this.noble?.state})`));
       }, 30000);
@@ -402,7 +403,7 @@ export class BTHome extends EventEmitter<BTHomeEvents> {
     }
     this.noble = await import('@stoprocent/noble')
       .then((noble) => noble.default)
-      .catch((err) => {
+      .catch((err: unknown) => {
         this.log.error(`Error loading noble: ${err instanceof Error ? err.message : String(err)}`);
         throw err;
       });
@@ -501,37 +502,43 @@ if (process.argv.includes('--scan')) {
     hasParameter('bthome'),
     hasParameter('shellyble'),
     hasParameter('address') ? getStringArrayParameter('address') : [],
-    hasParameter('logger') ? (process.argv[process.argv.indexOf('--logger') + 1] as LogLevel) : LogLevel.DEBUG,
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
+    hasParameter('logger') && typeof getParameter('logger') === 'string' ? (getParameter('logger') as LogLevel) : LogLevel.DEBUG,
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on('SIGINT', async () => {
-    bthome.logDevices();
-    await bthome.stop();
-    process.exit(0);
+  process.on('SIGINT', () => {
+    void (async (): Promise<void> => {
+      bthome.logDevices();
+      await bthome.stop();
+      process.exit(0);
+    })();
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on('SIGTERM', async () => {
-    bthome.logDevices();
-    await bthome.stop();
-    process.exit(0);
+  process.on('SIGTERM', () => {
+    void (async (): Promise<void> => {
+      bthome.logDevices();
+      await bthome.stop();
+      process.exit(0);
+    })();
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on('uncaughtException', async (error) => {
-    bthome.log.error('BTHome uncaught Exception:', error);
-    await bthome.stop();
+  process.on('uncaughtException', (error) => {
+    void (async (): Promise<void> => {
+      bthome.log.error('BTHome uncaught Exception:', error);
+      await bthome.stop();
+    })();
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-misused-promises
-  process.on('unhandledRejection', async (reason) => {
-    bthome.log.error('BTHome unhandled Rejection:', reason);
-    await bthome.stop();
+  process.on('unhandledRejection', (reason) => {
+    void (async (): Promise<void> => {
+      bthome.log.error('BTHome unhandled Rejection:', reason);
+      await bthome.stop();
+    })();
   });
 
-  bthome.start().catch((error) => {
+  bthome.start().catch((error: unknown) => {
     bthome.log.error('BTHome error starting BTHome discovery:', error);
+    // oxlint-disable-next-line unicorn/no-process-exit
     process.exit(1);
   });
 }

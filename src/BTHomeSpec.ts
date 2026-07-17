@@ -1,7 +1,6 @@
 /**
- * This file contains the BTHome specs.
- *
- * @file src\BTHomeSpec.ts
+ * @file src/BTHomeSpec.ts
+ * @description This file contains the BTHome specs.
  * @author Luca Liguori
  * @created 2025-04-22
  * @version 1.0.0
@@ -19,7 +18,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
 
 /**
@@ -190,6 +189,7 @@ export const BTHOME_SPEC: Readonly<Record<number, BTHomeSpecEntry>> = {
       const evt = buf.readUInt8(off);
       const steps = buf.readUInt8(off + 1);
       const map = { 0x00: 'none', 0x01: 'rotateLeft', 0x02: 'rotateRight' };
+      // oxlint-disable-next-line typescript/no-unsafe-type-assertion
       return { event: map[evt as keyof typeof map] || `evt0x${evt.toString(16)}`, steps };
     },
   },

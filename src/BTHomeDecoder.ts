@@ -1,7 +1,6 @@
 /**
- * This file contains the BTHome decoder.
- *
- * @file src\BTHomeDecoder.ts
+ * @file src/BTHomeDecoder.ts
+ * @description This file contains the BTHome decoder.
  * @author Luca Liguori
  * @created 2025-04-22
  * @version 1.0.0
@@ -19,8 +18,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License. *
+ * limitations under the License.
  */
+
+/* oxlint-disable no-bitwise */
 
 import { BTHOME_SPEC } from './BTHomeSpec.js';
 
@@ -62,7 +63,7 @@ export function decodeBTHome(buf: Buffer): DecodedBTHome {
   while (offset < buf.length) {
     const id = buf.readUInt8(offset++);
     ids.push(id);
-    const spec = BTHOME_SPEC[id as keyof typeof BTHOME_SPEC];
+    const spec = BTHOME_SPEC[id];
 
     if (!spec) {
       // First unknown: dump remainder and stop cause we don't know how to handle the length of the unknown field
@@ -77,6 +78,7 @@ export function decodeBTHome(buf: Buffer): DecodedBTHome {
       value = spec.parser(buf, offset);
 
       // advance by either spec.bytes or (1 + length prefix) for text/raw
+      // oxlint-disable-next-line unicorn/no-negated-condition no-eq-null
       if (spec.bytes != null) {
         offset += spec.bytes;
       } else {
@@ -86,6 +88,7 @@ export function decodeBTHome(buf: Buffer): DecodedBTHome {
       }
     } else {
       // numeric field: bytes must be a number
+      // oxlint-disable-next-line no-eq-null
       if (spec.bytes == null) {
         throw new Error(`BTHome spec for ${spec.name} is missing 'bytes'`);
       }
@@ -95,7 +98,7 @@ export function decodeBTHome(buf: Buffer): DecodedBTHome {
 
       // value = raw * factor;
       // Keep the decimal precision based on factor
-      value = parseFloat((raw * factor).toFixed(Math.log10(1 / factor)));
+      value = Number.parseFloat((raw * factor).toFixed(Math.log10(1 / factor)));
       offset += bytes;
     }
 
@@ -107,7 +110,7 @@ export function decodeBTHome(buf: Buffer): DecodedBTHome {
       if (spec.name in readings) {
         // If the same name appears multiple times, append the count to the name
         readings[spec.name + ':1'] = readings[spec.name];
-        // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+        // oxlint-disable-next-line typescript/no-dynamic-delete
         delete readings[spec.name];
       }
     }
