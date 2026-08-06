@@ -1,5 +1,3 @@
-<!-- eslint-disable markdown/no-missing-label-refs -->
-
 # <img src="https://matterbridge.io/assets/matterbridge.svg" alt="Matterbridge Logo" width="64px" height="64px">&nbsp;&nbsp;&nbsp;Matterbridge bthome plugin changelog
 
 [![npm version](https://img.shields.io/npm/v/matterbridge-bthome.svg)](https://www.npmjs.com/package/matterbridge-bthome)
@@ -42,11 +40,11 @@ If you like this project and find it useful, please consider giving it a star on
 
 ### Changed
 
-- [package]: Bump `oxfmt` to v.0.61.0.
-- [package]: Bump `oxlint` to v.1.76.0.
+- [package]: Bump `oxfmt` to v.0.62.0.
+- [package]: Bump `oxlint` to v.1.77.0.
 - [package]: Bump `oxlint-tsgolint` to v.7.0.2001.
 - [package]: Bump `@types/node` to v.26.1.2.
-- [package]: Bump `@stoprocent/noble` to v.2.6.5.
+- [package]: Bump `@stoprocent/noble` to v.2.7.1.
 - [package]: Update agents configs.
 
 <a href="https://www.buymeacoffee.com/luligugithub"><img src="https://matterbridge.io/assets/bmc-button.svg" alt="Buy me a coffee" width="80"></a>
