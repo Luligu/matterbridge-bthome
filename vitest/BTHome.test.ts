@@ -8,7 +8,7 @@ const NAME = 'BTHome';
 
 import type { PeripheralAdvertisement } from '@stoprocent/noble';
 import { LogLevel } from 'matterbridge/logger';
-import { loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { loggerLogSpy, setDebug, setupTest } from 'matterbridge/test-utils/vitest';
 
 import { BTHome } from '../src/BTHome.js';
 import { decodeBTHome } from '../src/BTHomeDecoder.js';

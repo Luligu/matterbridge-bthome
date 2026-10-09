@@ -11,16 +11,19 @@ const MATTER_PORT = 6000;
 
 import type { PlatformMatterbridge } from 'matterbridge';
 import { idn, LogLevel, nf, rs } from 'matterbridge/logger';
-import { log, loggerLogSpy, setDebug, setupTest } from 'matterbridge/vitest-utils';
 import {
   addMatterbridge,
   createServerNode,
   createTestEnvironment,
   destroyTestEnvironment,
   getMatterbridge,
+  log,
+  loggerLogSpy,
+  setDebug,
+  setupTest,
   startServerNode,
   stopServerNode,
-} from 'matterbridge/vitest-utils/matter';
+} from 'matterbridge/test-utils/vitest';
 
 import { BTHome, type BTHomeDevice } from '../src/BTHome.js';
 import initializePlugin, { type BTHomePlatformConfig, Platform } from '../src/module.js';
