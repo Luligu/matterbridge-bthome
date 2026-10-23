@@ -7,7 +7,7 @@
 const NAME = 'BTHomeStart';
 
 import { LogLevel } from 'matterbridge/logger';
-import { setDebug, setupTest } from 'matterbridge/vitest-utils';
+import { setDebug, setupTest } from 'matterbridge/test-utils/vitest';
 import type { Mock } from 'vitest';
 
 await setupTest(NAME, false);
