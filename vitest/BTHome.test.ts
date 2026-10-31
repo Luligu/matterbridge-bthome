@@ -10,7 +10,7 @@ import type { PeripheralAdvertisement } from '@stoprocent/noble';
 import { LogLevel } from 'matterbridge/logger';
 import { loggerLogSpy, setDebug, setupTest } from 'matterbridge/test-utils/vitest';
 
-import { BTHome } from '../src/BTHome.js';
+import { BTHome, isLogLevel } from '../src/BTHome.js';
 import { decodeBTHome } from '../src/BTHomeDecoder.js';
 import { decodeShellyManufacturerData, getShellyBluLongName, getShellyBluShortName } from '../src/BTHomeShellyMdDecoder.js';
 import { BTHOME_SPEC } from '../src/BTHomeSpec.js';
@@ -102,6 +102,16 @@ describe('TestPlatform', () => {
   afterAll(async () => {
     // Restore all mocks
     vi.restoreAllMocks();
+  });
+
+  test('should accept only valid LogLevel values when isLogLevel is called', () => {
+    for (const level of [LogLevel.DEBUG, LogLevel.INFO, LogLevel.NOTICE, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.NONE]) {
+      expect(isLogLevel(level)).toBe(true);
+    }
+    expect(isLogLevel('verbose')).toBe(false);
+    expect(isLogLevel('DEBUG')).toBe(false);
+    expect(isLogLevel(null)).toBe(false);
+    expect(isLogLevel(1)).toBe(false);
   });
 
   test('should initialize scanner flags when constructed with explicit filters', () => {

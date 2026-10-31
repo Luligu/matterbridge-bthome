@@ -496,14 +496,25 @@ function getStringArrayParameter(name: string): string[] {
   return values;
 }
 
+/**
+ * Checks whether a value is a valid LogLevel.
+ *
+ * @param {unknown} value - The value to check.
+ * @returns {value is LogLevel} True if the value is one of the LogLevel values.
+ */
+export function isLogLevel(value: unknown): value is LogLevel {
+  const levels: string[] = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.NOTICE, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL, LogLevel.NONE];
+  return typeof value === 'string' && levels.includes(value);
+}
+
 if (process.argv.includes('--scan')) {
+  const logger = getParameter('logger');
   const bthome = new BTHome(
     hasParameter('ble'),
     hasParameter('bthome'),
     hasParameter('shellyble'),
     hasParameter('address') ? getStringArrayParameter('address') : [],
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion
-    hasParameter('logger') && typeof getParameter('logger') === 'string' ? (getParameter('logger') as LogLevel) : LogLevel.DEBUG,
+    isLogLevel(logger) ? logger : LogLevel.DEBUG,
   );
 
   process.on('SIGINT', () => {
